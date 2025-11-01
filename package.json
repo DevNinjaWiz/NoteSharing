@@ -44,5 +44,9 @@
     "express": "^4.21.2",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
+  },
+  "scripts": {
+    "frontend": "nx serve my-angular-app",
+    "notes": "nx serve notes-service"
   }
 }
