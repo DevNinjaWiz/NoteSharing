@@ -43,3 +43,6 @@ Thumbs.db
 
 # Specification
 /specification
+.nx/installation
+.nx/cache
+.nx/workspace-data
