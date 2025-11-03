@@ -12,7 +12,7 @@ The frontend is a modern Angular application, and the backend is a robust, micro
 *   **Language:** TypeScript
 *   **Frontend:** Angular (with Signals)
 *   **Backend:** Node.js, Express
-*   **Database:** MongoDB (with Mongoose)
+*   **Database:** Firebase Firestore
 *   **Architecture:** Microservices, 5-Layer Clean Architecture, SOLID Principles
 *   **Containerization:** Docker, Docker Compose
 *   **Styling:** SCSS

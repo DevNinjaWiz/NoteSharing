@@ -1,6 +1,5 @@
 // Functions
-export * from './lib/functions/connectToDatabase';
-export * from './lib/functions/disconnectFromDatabase';
+export * from './lib/functions/connectToFirebase';
 
 // Types
 export * from './lib/types/backend/message.response';

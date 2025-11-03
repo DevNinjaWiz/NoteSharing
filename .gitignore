@@ -47,3 +47,5 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 .angular
+.env
+note-sharing-e6760-firebase-adminsdk-fbsvc-270bb3d409.json
