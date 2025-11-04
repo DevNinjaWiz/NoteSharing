@@ -4,7 +4,7 @@ dotenv.config();
 import * as path from 'path';
 import { firestore } from '@notes-sharing/shared';
 import { FirebaseNoteRepository } from './infrastructure';
-import { CreateNoteUseCase } from './service';
+import { CreateNoteUseCase, GetAllNotesUseCase } from './service';
 import { NotesController } from './api';
 
 const app = express();
@@ -13,12 +13,14 @@ app.use(express.json()); // Enable JSON body parsing
 // Dependency Injection
 const noteRepository = new FirebaseNoteRepository(firestore);
 const createNoteUseCase = new CreateNoteUseCase(noteRepository);
-const notesController = new NotesController(createNoteUseCase);
+const getAllNotesUseCase = new GetAllNotesUseCase(noteRepository);
+const notesController = new NotesController(createNoteUseCase, getAllNotesUseCase);
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // API Routes
 app.post('/api/notes', (req, res) => notesController.createNote(req, res));
+app.get('/api/notes', (req, res) => notesController.getNotes(req, res));
 
 app.get('/api', (req, res) => {
   res.send({ message: 'Welcome to notes-service!!' });
