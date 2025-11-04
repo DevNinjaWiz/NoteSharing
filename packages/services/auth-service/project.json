@@ -1,7 +1,7 @@
 {
-  "name": "notes-service",
+  "name": "auth-service",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/services/notes-service/src",
+  "sourceRoot": "packages/services/auth-service/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -12,11 +12,11 @@
       "options": {
         "target": "node",
         "compiler": "tsc",
-        "outputPath": "dist/packages/services/notes-service",
-        "main": "packages/services/notes-service/src/main.ts",
-        "tsConfig": "packages/services/notes-service/tsconfig.app.json",
-        "assets": ["packages/services/notes-service/src/assets"],
-        "webpackConfig": "packages/services/notes-service/webpack.config.js"
+        "outputPath": "dist/packages/services/auth-service",
+        "main": "packages/services/auth-service/src/main.ts",
+        "tsConfig": "packages/services/auth-service/tsconfig.app.json",
+        "assets": ["packages/services/auth-service/src/assets"],
+        "webpackConfig": "packages/services/auth-service/webpack.config.js"
       },
       "configurations": {
         "development": {},
@@ -28,8 +28,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/packages/services/notes-service/package.json",
-        "{workspaceRoot}/dist/packages/services/notes-service/package-lock.json"
+        "{workspaceRoot}/dist/packages/services/auth-service/package.json",
+        "{workspaceRoot}/dist/packages/services/auth-service/package-lock.json"
       ],
       "options": {
         "buildTarget": "build"
@@ -39,7 +39,7 @@
       "dependsOn": ["build"],
       "cache": true,
       "outputs": [
-        "{workspaceRoot}/dist/packages/services/notes-service/workspace_modules"
+        "{workspaceRoot}/dist/packages/services/auth-service/workspace_modules"
       ],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
@@ -56,15 +56,15 @@
       "defaultConfiguration": "development",
       "dependsOn": ["build"],
       "options": {
-        "buildTarget": "notes-service:build",
+        "buildTarget": "auth-service:build",
         "runBuildTargetDependencies": false
       },
       "configurations": {
         "development": {
-          "buildTarget": "notes-service:build:development"
+          "buildTarget": "auth-service:build:development"
         },
         "production": {
-          "buildTarget": "notes-service:build:production"
+          "buildTarget": "auth-service:build:production"
         }
       }
     }

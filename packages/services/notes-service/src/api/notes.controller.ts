@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateNoteUseCase } from '../service/create-note.usecase';
+import { CreateNoteUseCase } from '../service';
 import { INote } from '../domain';
 
 export class NotesController {

@@ -51,7 +51,7 @@ The development environment is managed using Docker and Docker Compose to replic
 
 *   **Run Frontend:**
     ```bash
-    nx serve org
+    nx serve my-angular-app
     ```
     This will start the Angular development server on `http://localhost:4200/`. The application is configured to send all API requests to the API Gateway.
 

@@ -3,9 +3,9 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import * as path from 'path';
 import { firestore } from '@notes-sharing/shared';
-import { FirebaseNoteRepository } from './infrastructure/firebase-note.repository';
-import { CreateNoteUseCase } from './service/create-note.usecase';
-import { NotesController } from './api/notes.controller';
+import { FirebaseNoteRepository } from './infrastructure';
+import { CreateNoteUseCase } from './service';
+import { NotesController } from './api';
 
 const app = express();
 app.use(express.json()); // Enable JSON body parsing

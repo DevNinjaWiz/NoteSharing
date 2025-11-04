@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@notes-sharing/shared": ["packages/shared/src/index.ts"]
+      "@notes-sharing/shared": ["packages/shared/src/index.ts"],
+      "@shared": ["packages/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
