@@ -1,34 +1,44 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { AuthStore } from '../../store/auth.store';
+import { AuthCredentials } from '../../models/auth.model';
+import { Router } from '@angular/router'; // Import Router
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule]
+  imports: [ReactiveFormsModule],
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  readonly store = inject(AuthStore);
+  private router = inject(Router); // Inject Router
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
+  constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required]],
     });
   }
 
   login() {
     if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe({
-        next: () => this.router.navigate(['/']),
-        error: (err) => console.error(err)
+      const credentials: AuthCredentials = this.loginForm.value;
+      this.store.login(credentials).subscribe({
+        // Subscribe to the Observable
+        next: () => {
+          this.router.navigate(['/']); // Navigate on success
+        },
+        error: (err) => {
+          console.error(err); // Handle error
+        },
       });
     }
   }

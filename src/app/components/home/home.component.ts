@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { AuthStore } from '../../store/auth.store';
+import { Router } from '@angular/router'; // Import Router
 
 @Component({
   selector: 'app-home',
@@ -9,10 +9,19 @@ import { Router } from '@angular/router';
   standalone: true,
 })
 export class HomeComponent {
-  constructor(private authService: AuthService, private router: Router) {}
+  readonly store = inject(AuthStore);
+  private router = inject(Router); // Inject Router
+
+  constructor() {}
 
   logout() {
-    this.authService.logout(); // logout is synchronous now
-    this.router.navigate(['/login']);
+    this.store.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']); // Navigate on success
+      },
+      error: (err) => {
+        console.error(err); // Handle error
+      },
+    });
   }
 }
