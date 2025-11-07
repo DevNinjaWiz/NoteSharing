@@ -32,7 +32,6 @@ export const AuthStore = signalStore(
   withState(initialState),
   withMethods((store, authService = inject(AuthService)) => ({
     register(credentials: AuthCredentials): Observable<User> {
-      // Return Observable
       patchState(store, { isLoading: true, error: null });
       return authService.register(credentials).pipe(
         tap({
@@ -46,7 +45,6 @@ export const AuthStore = signalStore(
       );
     },
     login(credentials: AuthCredentials): Observable<User> {
-      // Return Observable
       patchState(store, { isLoading: true, error: null });
       return authService.login(credentials).pipe(
         tap({
@@ -60,7 +58,6 @@ export const AuthStore = signalStore(
       );
     },
     logout(): Observable<boolean> {
-      // Return Observable
       return authService.logout().pipe(
         tap({
           next: () => {
@@ -73,7 +70,7 @@ export const AuthStore = signalStore(
       );
     },
   })),
-  // Selectors
+
   withComputed((store) => ({
     isLoggedIn: computed(() => !!store.currentUser()),
   })),

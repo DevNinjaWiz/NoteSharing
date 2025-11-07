@@ -89,13 +89,63 @@ app.post('/api/notes', (req, res) => {
       return res.status(500).send('Error reading data file.');
     }
     const db = JSON.parse(data);
-    const newNote = req.body;
+    const newNote = {
+      id: Date.now().toString(), // Simple unique ID
+      ...req.body,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
     db.notes.push(newNote);
     fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
       if (err) {
         return res.status(500).send('Error writing data file.');
       }
       res.status(201).json(newNote);
+    });
+  });
+});
+
+app.put('/api/notes/:id', (req, res) => {
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Error reading data file.');
+    }
+    const db = JSON.parse(data);
+    const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
+    if (noteIndex === -1) {
+      return res.status(404).send('Note not found.');
+    }
+    const updatedNote = {
+      ...db.notes[noteIndex],
+      ...req.body,
+      updatedAt: new Date(),
+    };
+    db.notes[noteIndex] = updatedNote;
+    fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
+      if (err) {
+        return res.status(500).send('Error writing data file.');
+      }
+      res.status(200).json(updatedNote);
+    });
+  });
+});
+
+app.delete('/api/notes/:id', (req, res) => {
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Error reading data file.');
+    }
+    const db = JSON.parse(data);
+    const newNotes = db.notes.filter((note) => note.id !== req.params.id);
+    if (db.notes.length === newNotes.length) {
+      return res.status(404).send('Note not found.');
+    }
+    db.notes = newNotes;
+    fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
+      if (err) {
+        return res.status(500).send('Error writing data file.');
+      }
+      res.status(204).send();
     });
   });
 });

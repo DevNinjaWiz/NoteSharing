@@ -3,12 +3,16 @@
   <form [formGroup]="loginForm" (ngSubmit)="login()">
     <div class="form-group">
       <label for="email">Email</label>
-      <input type="email" id="email" formControlName="email">
+      <input type="email" id="email" formControlName="email" />
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input type="password" id="password" formControlName="password">
+      <input type="password" id="password" formControlName="password" />
     </div>
     <button type="submit" [disabled]="loginForm.invalid">Login</button>
   </form>
+
+ 
+  <p>{{ $errorMessage() }}</p>
+  
 </div>
