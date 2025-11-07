@@ -49,3 +49,6 @@ Thumbs.db
 .angular
 .env
 note-sharing-e6760-firebase-adminsdk-fbsvc-270bb3d409.json
+
+# Backend
+/backend/node_modules
