@@ -1,5 +1,30 @@
 {
-  "notes": [],
+  "notes": [
+    {
+      "id": "1",
+      "title": "First Note",
+      "content": "This is the first note.",
+      "createdAt": "2025-11-07T12:00:00.000Z",
+      "updatedAt": "2025-11-07T12:00:00.000Z",
+      "userId": "1"
+    },
+    {
+      "id": "2",
+      "title": "Second Note",
+      "content": "This is the second note.",
+      "createdAt": "2025-11-07T12:05:00.000Z",
+      "updatedAt": "2025-11-07T12:05:00.000Z",
+      "userId": "1"
+    },
+    {
+      "id": "3",
+      "title": "Third Note",
+      "content": "This is the third note.",
+      "createdAt": "2025-11-07T12:10:00.000Z",
+      "updatedAt": "2025-11-07T12:10:00.000Z",
+      "userId": "2"
+    }
+  ],
   "users": [
     {
       "email": "test@gmail.com",
