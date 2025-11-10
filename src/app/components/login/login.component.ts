@@ -43,7 +43,7 @@ export class LoginComponent {
       .pipe(
         tap(() => {
           console.log('Login successful');
-          this.notesStore.loadNotes();
+          // this.notesStore.loadNotes();
           this.router.navigate(['/']);
         }),
         take(1)

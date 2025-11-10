@@ -1,7 +1,82 @@
-<div>
-  <h1>Welcome!</h1>
-  <button (click)="logout()">Logout</button>
-  <a routerLink="/dashboard">Go to Dashboard</a>
+<div class="home">
+  <header class="home__header">
+    <div>
+      <p class="home__eyebrow">Welcome back</p>
+      <h1>Manage your notes</h1>
+    </div>
+    <div class="home__actions">
+      <button type="button" (click)="refreshNotes()">Reload Notes</button>
+      <button type="button" (click)="logout()">Logout</button>
+      <a routerLink="/dashboard">Go to Dashboard</a>
+    </div>
+  </header>
 
-  <button (click)="test()">test</button>
+  <section class="home__form">
+    <h2>{{ editingNoteId ? 'Update note' : 'Create a note' }}</h2>
+    <form [formGroup]="noteForm" (ngSubmit)="submitNote()">
+      <label class="home__field">
+        <span>Title</span>
+        <input
+          type="text"
+          placeholder="Give your note a title"
+          formControlName="title"
+        />
+      </label>
+      <label class="home__field">
+        <span>Content</span>
+        <textarea
+          rows="3"
+          placeholder="Add some details..."
+          formControlName="content"
+        ></textarea>
+      </label>
+      <div class="home__formActions">
+        <button type="submit" [disabled]="noteForm.invalid">
+          {{ editingNoteId ? 'Save Changes' : 'Add Note' }}
+        </button>
+        <button type="button" *ngIf="editingNoteId" (click)="cancelEdit()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="home__status" *ngIf="notesStore.isLoading()">
+    Loading notes...
+  </section>
+
+  <section
+    class="home__status error"
+    *ngIf="!notesStore.isLoading() && notesStore.error() as error"
+  >
+    <p>Failed to load notes: {{ error }}</p>
+  </section>
+
+  <section
+    class="home__notes"
+    *ngIf="!notesStore.isLoading() && notesStore.notes().length; else emptyNotes"
+  >
+    <div class="home__notesHeader">
+      <h2>Your Notes</h2>
+      <button type="button" (click)="refreshNotes()">Refresh</button>
+    </div>
+    <ul>
+      <li *ngFor="let note of notesStore.notes(); trackBy: trackByNoteId">
+        <div class="home__noteHeader">
+          <h3>{{ note.title || 'Untitled note' }}</h3>
+          <div class="home__noteActions">
+            <button type="button" (click)="startEdit(note)">Edit</button>
+            <button type="button" (click)="deleteNote(note.id)">Delete</button>
+          </div>
+        </div>
+        <p>{{ note.content || 'No content available.' }}</p>
+      </li>
+    </ul>
+  </section>
+
+  <ng-template #emptyNotes>
+    <section class="home__empty">
+      <p>No notes yet. Use the form above to create your first note.</p>
+    </section>
+  </ng-template>
 </div>
