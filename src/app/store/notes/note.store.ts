@@ -1,75 +1,78 @@
-import { inject } from '@angular/core';
-import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
+import { computed, inject } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import {
+  signalStore,
+  withMethods,
+  withProps,
+  withComputed,
+  withState,
+  patchState,
+} from '@ngrx/signals';
 import { Note } from './note.model';
 import { NoteService } from '../../services/note.service';
-import { tap, switchMap, catchError, of } from 'rxjs';
+import { tap } from 'rxjs';
 
 export interface NotesState {
-  notes: Note[];
-  isLoading: boolean;
-  error: string | null;
+  isLoadNotes: boolean;
 }
 
 const initialState: NotesState = {
-  notes: [],
-  isLoading: false,
-  error: null,
+  isLoadNotes: false,
 };
 
 export const NotesStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withMethods((store, noteService = inject(NoteService)) => ({
+  withProps((store) => {
+    const noteService = inject(NoteService);
+    const notesResource = httpResource<Note[]>(
+      () => (store.isLoadNotes() ? noteService.apiUrl : undefined),
+      { defaultValue: [] }
+    );
+
+    return {
+      noteService,
+      notesResource,
+    };
+  }),
+  withComputed((store) => ({
+    notes: computed(() => store.notesResource.value()),
+    isLoading: computed(() => store.notesResource.isLoading()),
+    error: computed(() => store.notesResource.error()?.message ?? null),
+  })),
+  withMethods((store) => ({
     loadNotes() {
-      patchState(store, { isLoading: true });
-      return noteService.getNotes().pipe(
-        tap((notes) => patchState(store, { notes, isLoading: false })),
-        catchError((error) => {
-          patchState(store, { error: error.message, isLoading: false });
-          return of(error);
-        })
-      );
+      if (!store.isLoadNotes()) {
+        patchState(store, { isLoadNotes: true });
+        return true;
+      }
+      return store.notesResource.reload();
     },
     addNote(note: Partial<Note>) {
-      patchState(store, { isLoading: true });
-      return noteService.addNote(note).pipe(
-        tap((newNote) =>
-          patchState(store, {
-            notes: [...store.notes(), newNote],
-            isLoading: false,
-          })
-        ),
-        catchError((error) => {
-          patchState(store, { error: error.message, isLoading: false });
-          return of(error);
+      return store.noteService.addNote(note).pipe(
+        tap((newNote) => {
+          store.notesResource.update((notes) => [...notes, newNote]);
         })
       );
     },
     updateNote(id: string, note: Partial<Note>) {
-      patchState(store, { isLoading: true });
-      return noteService.updateNote(id, note).pipe(
+      return store.noteService.updateNote(id, note).pipe(
         tap((updatedNote) => {
-          const newNotes = store
-            .notes()
-            .map((n) => (n.id === id ? updatedNote : n));
-          patchState(store, { notes: newNotes, isLoading: false });
-        }),
-        catchError((error) => {
-          patchState(store, { error: error.message, isLoading: false });
-          return of(error);
+          const targetId = updatedNote?.id ?? id;
+          store.notesResource.update((notes) =>
+            notes.map((existing) =>
+              existing.id === targetId ? updatedNote : existing
+            )
+          );
         })
       );
     },
     deleteNote(id: string) {
-      patchState(store, { isLoading: true });
-      return noteService.deleteNote(id).pipe(
+      return store.noteService.deleteNote(id).pipe(
         tap(() => {
-          const newNotes = store.notes().filter((n) => n.id !== id);
-          patchState(store, { notes: newNotes, isLoading: false });
-        }),
-        catchError((error) => {
-          patchState(store, { error: error.message, isLoading: false });
-          return of(error);
+          store.notesResource.update((notes) =>
+            notes.filter((existing) => existing.id !== id)
+          );
         })
       );
     },

@@ -8,7 +8,8 @@ import {
 import { AuthStore } from '../../store/auth.store';
 import { AuthCredentials } from '../../models/auth.model';
 import { Router } from '@angular/router'; // Import Router
-import { catchError, tap } from 'rxjs';
+import { take, tap } from 'rxjs';
+import { NotesStore } from '../../store/notes/note.store';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +21,7 @@ import { catchError, tap } from 'rxjs';
 export class LoginComponent {
   loginForm: FormGroup;
   readonly store = inject(AuthStore);
+  private readonly notesStore = inject(NotesStore);
   private router = inject(Router); // Inject Router
 
   $errorMessage = computed(() => this.store.error());
@@ -32,27 +34,22 @@ export class LoginComponent {
   }
 
   login() {
-    if (this.loginForm.valid) {
-      const credentials: AuthCredentials = this.loginForm.value;
-      this.store
-        .login(credentials)
-        .pipe(
-          tap(() => {
-            this.router.navigate(['/']);
-          }),
-          catchError((error) => {
-            throw 'error in source. Details: ' + error;
-          })
-        )
-        .subscribe({
-          // // Subscribe to the Observable
-          // next: () => {
-          //   this.router.navigate(['/']); // Navigate on success
-          // },
-          // error: (err) => {
-          //   console.error(err); // Handle error
-          // },
-        });
-    }
+    // this.notesStore.loadNotes();
+
+    const credentials = this.loginForm.getRawValue() as AuthCredentials;
+
+    this.store
+      .login(credentials)
+      .pipe(
+        tap(() => {
+          console.log('Login successful');
+          this.notesStore.loadNotes();
+          this.router.navigate(['/']);
+        }),
+        take(1)
+      )
+      .subscribe({
+        error: (error) => console.error('Login failed', error),
+      });
   }
 }

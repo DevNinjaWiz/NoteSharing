@@ -5,9 +5,9 @@ import { Note } from '../store/notes/note.model';
 
 @Injectable({ providedIn: 'root' })
 export class NoteService {
-  private apiUrl = 'http://localhost:3000/api/notes'; // Adjust this to your backend API URL
+  readonly apiUrl = 'http://localhost:3000/api/notes'; // Adjust this to your backend API URL
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
   getNotes(): Observable<Note[]> {
     return this.http.get<Note[]>(this.apiUrl);
