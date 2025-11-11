@@ -1,58 +1,58 @@
 <div class="nz-input-shell">
-  <label *ngIf="label" class="nz-input-label">{{ label }}</label>
+  <label *ngIf="label()" class="nz-input-label">{{ label() }}</label>
 
   <div
     class="nz-input-wrapper"
-    [class.nz-input-wrapper--small]="size === 'small'"
-    [class.nz-input-wrapper--large]="size === 'large'"
-    [class.nz-input-wrapper--borderless]="variant === 'borderless'"
-    [class.nz-input-wrapper--filled]="variant === 'filled'"
-    [class.nz-input-wrapper--underlined]="variant === 'underlined'"
-    [class.nz-input-wrapper--focused]="isFocused"
-    [class.nz-input-wrapper--error]="status === 'error'"
-    [class.nz-input-wrapper--warning]="status === 'warning'"
+    [class.nz-input-wrapper--small]="size() === 'small'"
+    [class.nz-input-wrapper--large]="size() === 'large'"
+    [class.nz-input-wrapper--borderless]="variant() === 'borderless'"
+    [class.nz-input-wrapper--filled]="variant() === 'filled'"
+    [class.nz-input-wrapper--underlined]="variant() === 'underlined'"
+    [class.nz-input-wrapper--focused]="isFocused()"
+    [class.nz-input-wrapper--error]="status() === 'error'"
+    [class.nz-input-wrapper--warning]="status() === 'warning'"
   >
-    <span *ngIf="prefixIcon" class="nz-input-prefix">
-      <span class="material-symbols-outlined" aria-hidden="true">{{ prefixIcon }}</span>
+    <span *ngIf="prefixIcon()" class="nz-input-prefix">
+      <span class="material-symbols-outlined" aria-hidden="true">{{ prefixIcon() }}</span>
     </span>
 
     <input
       class="nz-input-field"
-      [type]="type"
-      [value]="value"
-      [attr.placeholder]="placeholder || null"
-      [attr.name]="name || null"
-      [attr.autocomplete]="autocomplete || null"
-      [attr.autofocus]="autofocus ? true : null"
-      [attr.disabled]="disabled ? true : null"
+      [type]="type()"
+      [value]="value()"
+      [attr.placeholder]="placeholder() || null"
+      [attr.name]="name() || null"
+      [attr.autocomplete]="autocomplete() || null"
+      [attr.autofocus]="autofocus() ? true : null"
+      [attr.disabled]="disabled() ? true : null"
       (input)="onInput($event)"
       (focus)="onFocus()"
       (blur)="onBlur()"
     />
 
     <button
-      *ngIf="allowClear && hasValue"
+      *ngIf="allowClear() && hasValue()"
       type="button"
       class="nz-input-clear"
       tabindex="-1"
       (click)="clearValue()"
-      [disabled]="disabled"
+      [disabled]="disabled()"
       aria-label="Clear"
     >
       <span class="material-symbols-outlined" aria-hidden="true">close</span>
     </button>
 
-    <span *ngIf="suffixIcon" class="nz-input-suffix">
-      <span class="material-symbols-outlined" aria-hidden="true">{{ suffixIcon }}</span>
+    <span *ngIf="suffixIcon()" class="nz-input-suffix">
+      <span class="material-symbols-outlined" aria-hidden="true">{{ suffixIcon() }}</span>
     </span>
   </div>
 
   <p
-    *ngIf="helperText || status"
+    *ngIf="helperText() || status()"
     class="nz-input-hint"
-    [class.nz-input-hint--error]="status === 'error'"
-    [class.nz-input-hint--warning]="status === 'warning'"
+    [class.nz-input-hint--error]="status() === 'error'"
+    [class.nz-input-hint--warning]="status() === 'warning'"
   >
-    {{ helperText || defaultStatusMessage }}
+    {{ helperText() || defaultStatusMessage }}
   </p>
 </div>

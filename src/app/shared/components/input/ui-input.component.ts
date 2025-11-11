@@ -1,15 +1,13 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  computed,
   forwardRef,
+  input,
+  model,
+  signal,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-} from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 type InputSize = 'default' | 'small' | 'large';
 type InputVariant = 'outlined' | 'borderless' | 'filled' | 'underlined';
@@ -20,7 +18,7 @@ type InputStatus = 'error' | 'warning' | null;
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ui-input.component.html',
-  styleUrls: ['./ui-input.component.scss'], 
+  styleUrls: ['./ui-input.component.scss'],
   host: {
     class: 'shared-ui-input',
   },
@@ -33,69 +31,58 @@ type InputStatus = 'error' | 'warning' | null;
   ],
 })
 export class UiInputComponent implements ControlValueAccessor {
-  @Input() label?: string;
-  @Input() placeholder = '';
-  @Input() name?: string;
-  @Input() autocomplete?: string;
-  @Input() type: 'text' | 'email' | 'password' | 'number' = 'text';
-  @Input() size: InputSize = 'default';
-  @Input() variant: InputVariant = 'outlined';
-  @Input() status: InputStatus = null;
-  @Input() helperText?: string;
-  @Input() prefixIcon?: string;
-  @Input() suffixIcon?: string;
-  @Input() allowClear = false;
-  @Input() disabled = false;
-  @Input() autofocus = false;
+  readonly label = input<string | undefined>(undefined);
+  readonly placeholder = input('');
+  readonly name = input<string | undefined>(undefined);
+  readonly autocomplete = input<string | undefined>(undefined);
+  readonly type = input<'text' | 'email' | 'password' | 'number'>('text');
+  readonly size = input<InputSize>('default');
+  readonly variant = input<InputVariant>('outlined');
+  readonly status = input<InputStatus>(null);
+  readonly helperText = input<string | undefined>(undefined);
+  readonly prefixIcon = input<string | undefined>(undefined);
+  readonly suffixIcon = input<string | undefined>(undefined);
+  readonly allowClear = input<boolean>(false);
+  readonly disabledInput = input<boolean>(false);
+  readonly autofocus = input<boolean>(false);
+  private readonly disabledFromControl = signal(false);
 
-  @Input()
-  get value(): string {
-    return this._value;
-  }
-  set value(newValue: string) {
-    this._value = newValue ?? '';
-  }
+  readonly value = model<string>('');
+  readonly isFocused = signal(false);
+  readonly hasValue = computed(() => this.value().length > 0);
+  readonly disabled = computed(
+    () => !!this.disabledInput() || this.disabledFromControl()
+  );
 
-  @Output() valueChange = new EventEmitter<string>();
-
-  isFocused = false;
-
-  protected get hasValue(): boolean {
-    return this._value.length > 0;
-  }
-
-  private _value = '';
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
   onInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    this._value = input.value;
-    this.valueChange.emit(this._value);
-    this.onChange(this._value);
+    this.value.set(input.value);
+    this.onChange(this.value());
   }
 
   onFocus() {
-    this.isFocused = true;
+    this.isFocused.set(true);
   }
 
   onBlur() {
-    this.isFocused = false;
+    this.isFocused.set(false);
     this.onTouched();
   }
 
   clearValue() {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
 
-    this._value = '';
-    this.valueChange.emit(this._value);
-    this.onChange(this._value);
+    this.value.set('');
+    this.onChange(this.value());
   }
 
   writeValue(value: string | null): void {
-    this._value = value ?? '';
+    this.value.set(value ?? '');
   }
 
   registerOnChange(fn: (value: string) => void): void {
@@ -107,15 +94,17 @@ export class UiInputComponent implements ControlValueAccessor {
   }
 
   setDisabledState?(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabledFromControl.set(isDisabled);
   }
 
   protected get defaultStatusMessage(): string {
-    if (this.status === 'error') {
+    const status = this.status();
+
+    if (status === 'error') {
       return 'Please resolve the highlighted problem.';
     }
 
-    if (this.status === 'warning') {
+    if (status === 'warning') {
       return 'Review this field before submitting.';
     }
 

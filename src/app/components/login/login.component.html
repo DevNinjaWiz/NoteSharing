@@ -1,21 +1,21 @@
-﻿<div class="login-shell">
-  <div class="login-shell__panel">
-    <header class="login-header">
-      <span class="material-symbols-outlined login-icon" aria-hidden="true">description</span>
+﻿<div class="login">
+  <div class="login__panel">
+    <header class="login__header">
+      <span class="material-symbols-outlined login__icon" aria-hidden="true">description</span>
       <div>
         <h1>Welcome Back</h1>
-        <p class="login-header__subtitle">Log in to continue to your notes.</p>
+        <p class="login__subtitle">Log in to continue to your notes.</p>
       </div>
     </header>
 
-    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="login()">
+    <form class="login__form" [formGroup]="loginForm" (ngSubmit)="login()">
       @if ($errorMessage()) {
-        <div class="error-pill" role="status">
+        <div class="login__error" role="status">
           {{ $errorMessage() }}
         </div>
       }
 
-      <div class="field">
+      <div class="login__field">
         <shared-ui-input
           label="Email"
           prefixIcon="mail"
@@ -29,7 +29,7 @@
         ></shared-ui-input>
       </div>
 
-      <div class="field">
+      <div class="login__field">
         <shared-ui-input
           label="Password"
           prefixIcon="lock"
@@ -41,23 +41,25 @@
           [status]="passwordStatus"
           [helperText]="passwordHelperText"
         ></shared-ui-input>
-        <div class="field__helper">
-          <a class="helper-link" href="#">Forgot password?</a>
+        <div class="login__field-helper">
+          <a class="login__helper-link" href="#">Forgot password?</a>
         </div>
       </div>
 
-      <button
-        class="primary-button"
-        type="submit"
+      <shared-ui-button
+        variant="primary"
+        htmlType="submit"
+        [block]="true"
+        [loading]="store.isLoading()"
         [disabled]="loginForm.invalid || store.isLoading()"
       >
         Log In
-      </button>
+      </shared-ui-button>
     </form>
 
-    <p class="signup-cta">
+    <p class="login__signup">
       Don't have an account?
-      <a href="#">Sign up</a>
+      <a class="login__signup-link" href="#">Sign up</a>
     </p>
   </div>
 </div>

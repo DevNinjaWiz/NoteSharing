@@ -10,13 +10,14 @@ import { AuthCredentials } from '../../models/auth.model';
 import { Router } from '@angular/router'; // Import Router
 import { take, tap } from 'rxjs';
 import { UiInputComponent } from '../../shared/components/input/ui-input.component';
+import { UiButtonComponent } from '../../shared/components/button/ui-button.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, UiInputComponent],
+  imports: [ReactiveFormsModule, UiInputComponent, UiButtonComponent],
 })
 export class LoginComponent {
   loginForm: FormGroup;

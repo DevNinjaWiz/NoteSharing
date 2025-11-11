@@ -1,0 +1,188 @@
+@use '../../styles/index' as *;
+
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+
+:host {
+  display: inline-flex;
+}
+
+:host(.shared-ui-button--block) {
+  width: 100%;
+}
+
+.shared-ui-button__control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: space(15);
+  width: auto;
+  min-height: space(70);
+  padding: space(20) space(30);
+  border-radius: space(25);
+  border: 1px solid transparent;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
+    color 0.2s ease, border-color 0.2s ease;
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  color: #fff;
+  box-shadow: 0 15px 30px rgba(37, 99, 235, 0.45);
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 40px rgba(37, 99, 235, 0.55);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(147, 197, 253, 0.9);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &--block {
+    width: 100%;
+  }
+}
+
+.shared-ui-button__content:empty {
+  display: none;
+}
+
+.shared-ui-button__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: inline-flex;
+
+  &--suffix {
+    margin-left: space(5);
+  }
+
+  &--prefix {
+    margin-right: space(5);
+  }
+}
+
+.shared-ui-button__spinner {
+  width: space(30);
+  height: space(30);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: shared-ui-button-spin 0.9s linear infinite;
+}
+
+@keyframes shared-ui-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Variants inspired by NG-ZORRO's button API.
+.shared-ui-button__control--primary {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.shared-ui-button__control--default {
+  background: rgba(15, 23, 42, 0.65);
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.45);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3);
+}
+
+.shared-ui-button__control--dashed {
+  background: transparent;
+  color: #cbd5f5;
+  border-style: dashed;
+  border-color: rgba(148, 163, 184, 0.7);
+  box-shadow: none;
+}
+
+.shared-ui-button__control--link,
+.shared-ui-button__control--text {
+  background: transparent;
+  border-color: transparent;
+  color: #60a5fa;
+  box-shadow: none;
+  padding: 0;
+  min-height: auto;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    text-decoration: underline;
+    transform: none;
+  }
+}
+
+.shared-ui-button__control--link {
+  font-weight: 600;
+}
+
+.shared-ui-button__control--text {
+  color: #cbd5f5;
+}
+
+.shared-ui-button__control--danger {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 15px 30px rgba(220, 38, 38, 0.35);
+}
+
+.shared-ui-button__control--danger.shared-ui-button__control--link,
+.shared-ui-button__control--danger.shared-ui-button__control--text {
+  color: #f87171;
+}
+
+.shared-ui-button__control--ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.shared-ui-button__control--ghost.shared-ui-button__control--primary {
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.6);
+}
+
+.shared-ui-button__control--ghost.shared-ui-button__control--danger {
+  color: #fda4af;
+  border-color: rgba(248, 113, 113, 0.65);
+}
+
+.shared-ui-button__control--loading {
+  pointer-events: none;
+}
+
+.shared-ui-button__control--size-large {
+  min-height: space(80);
+  padding: space(25) space(35);
+  font-size: 1.05rem;
+}
+
+.shared-ui-button__control--size-small {
+  min-height: space(55);
+  padding: space(15) space(22);
+  font-size: 0.9rem;
+}
+
+.shared-ui-button__control--shape-round {
+  border-radius: 999px;
+}
+
+.shared-ui-button__control--shape-circle {
+  border-radius: 50%;
+  padding: 0;
+  width: space(80);
+  height: space(80);
+}
