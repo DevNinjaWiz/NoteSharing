@@ -53,7 +53,7 @@
   --notebook-button-hover-bg: rgba(15, 23, 42, 0.05);
   --primary-gradient-start: #2563eb;
   --primary-gradient-end: #1d4ed8;
-  --primary-text-color: #0f172a;
+  --primary-text-color: #fff;
   --main-bg: #f1f5f9;
   --topbar-bg: rgba(255, 255, 255, 0.9);
   --topbar-border: rgba(15, 23, 42, 0.08);
@@ -74,6 +74,15 @@
   --card-shadow-hover: 0 16px 40px rgba(15, 23, 42, 0.2);
   --excerpt-color: #475569;
   --view-toggle-border: rgba(15, 23, 42, 0.12);
+
+  .dashboard__primaryAction,
+  .dashboard__primaryAction .material-symbols-outlined,
+  .dashboard__empty button,
+  .dashboard__empty button .material-symbols-outlined,
+  .dashboard__viewToggle button.is-active,
+  .dashboard__viewToggle button.is-active .material-symbols-outlined {
+    color: #fff;
+  }
 }
 
 :host(.theme-dark) {

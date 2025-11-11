@@ -84,10 +84,11 @@
         <button
           class="dashboard__iconButton"
           type="button"
-          aria-label="Toggle theme"
+          (click)="toggleTheme()"
+          [attr.aria-label]="theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
         >
           <span class="material-symbols-outlined" aria-hidden="true">
-            light_mode
+            {{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}
           </span>
         </button>
         <button

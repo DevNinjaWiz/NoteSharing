@@ -1,8 +1,10 @@
 import {
   Component,
+  HostBinding,
   OnInit,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -36,6 +38,7 @@ interface NotebookLink {
 export class DashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly notesStore = inject(NotesStore);
+  readonly theme = signal<'dark' | 'light'>('dark');
 
   readonly sideNavLinks: readonly NavItem[] = [
     { label: 'All Notes', icon: 'description', isPrimary: true },
@@ -66,6 +69,16 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.notesStore.loadNotes();
+  }
+
+  @HostBinding('class.theme-light')
+  protected get isLightTheme(): boolean {
+    return this.theme() === 'light';
+  }
+
+  @HostBinding('class.theme-dark')
+  protected get isDarkTheme(): boolean {
+    return this.theme() === 'dark';
   }
 
   trackNote(_: number, note: Note): string {
@@ -131,5 +144,9 @@ export class DashboardComponent implements OnInit {
 
   createNewNote(): void {
     this.router.navigate(['/']);
+  }
+
+  toggleTheme(): void {
+    this.theme.set(this.theme() === 'dark' ? 'light' : 'dark');
   }
 }
