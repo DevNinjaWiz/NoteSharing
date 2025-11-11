@@ -5,18 +5,18 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { AuthStore } from '../../store/auth.store';
+import { AuthStore, NotesStore } from '../../store';
 import { AuthCredentials } from '../../models/auth.model';
 import { Router } from '@angular/router'; // Import Router
 import { take, tap } from 'rxjs';
-import { NotesStore } from '../../store/notes/note.store';
+import { UiInputComponent } from '../../shared/components/input/ui-input.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, UiInputComponent],
 })
 export class LoginComponent {
   loginForm: FormGroup;
@@ -51,5 +51,51 @@ export class LoginComponent {
       .subscribe({
         error: (error) => console.error('Login failed', error),
       });
+  }
+
+  get emailStatus(): 'error' | null {
+    const control = this.loginForm.get('email');
+    return control && control.invalid && (control.dirty || control.touched)
+      ? 'error'
+      : null;
+  }
+
+  get emailHelperText(): string | undefined {
+    const control = this.loginForm.get('email');
+
+    if (!control || !(control.dirty || control.touched)) {
+      return undefined;
+    }
+
+    if (control.hasError('required')) {
+      return 'Email is required.';
+    }
+
+    if (control.hasError('email')) {
+      return 'Enter a valid email address.';
+    }
+
+    return undefined;
+  }
+
+  get passwordStatus(): 'error' | null {
+    const control = this.loginForm.get('password');
+    return control && control.invalid && (control.dirty || control.touched)
+      ? 'error'
+      : null;
+  }
+
+  get passwordHelperText(): string | undefined {
+    const control = this.loginForm.get('password');
+
+    if (!control || !(control.dirty || control.touched)) {
+      return undefined;
+    }
+
+    if (control.hasError('required')) {
+      return 'Password is required.';
+    }
+
+    return undefined;
   }
 }

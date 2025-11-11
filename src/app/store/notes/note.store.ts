@@ -16,8 +16,9 @@ import {
   withEffects,
 } from '@ngrx/signals/events';
 import { Note } from './note.model';
-import { NoteService } from '../../services/note.service';
-import { EMPTY, catchError, concatMap, tap } from 'rxjs';
+import { NoteService } from '../../services';
+import { withLogger, errorLog } from '../../utils';
+import { concatMap, tap } from 'rxjs';
 
 export interface NotesState {
   isLoadNotes: boolean;
@@ -52,18 +53,18 @@ export const NotesStore = signalStore(
       notesResource,
     };
   }),
+  withLogger('NotesStore', [
+    (store) => ({
+      label: 'notesResource',
+      source: () => store.notesResource.value(),
+    }),
+  ]),
   withComputed((store) => ({
     notes: computed(() => store.notesResource.value()),
     isLoading: computed(() => store.notesResource.isLoading()),
     error: computed(() => store.notesResource.error()?.message ?? null),
   })),
   withEffects((store, events = inject(Events)) => {
-    const onError = (message: string) =>
-      catchError((error) => {
-        console.error(message, error);
-        return EMPTY;
-      });
-
     return {
       loadNotes$: events.on(notesEvents.load).pipe(
         tap(() => {
@@ -80,7 +81,7 @@ export const NotesStore = signalStore(
             tap((newNote) => {
               store.notesResource.update((notes) => [...notes, newNote]);
             }),
-            onError('Unable to add note')
+            errorLog('Unable to add note')
           )
         )
       ),
@@ -95,7 +96,7 @@ export const NotesStore = signalStore(
                 )
               );
             }),
-            onError('Unable to update note')
+            errorLog('Unable to update note')
           )
         )
       ),
@@ -107,7 +108,7 @@ export const NotesStore = signalStore(
                 notes.filter((existing) => existing.id !== payload.id)
               );
             }),
-            onError('Unable to delete note')
+            errorLog('Unable to delete note')
           )
         )
       ),

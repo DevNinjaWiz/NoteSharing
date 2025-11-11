@@ -5,7 +5,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { AuthStore } from '../../store/auth.store';
+import { AuthStore } from '../../store';
 import { AuthCredentials } from '../../models/auth.model';
 import { Router } from '@angular/router'; // Import Router
 

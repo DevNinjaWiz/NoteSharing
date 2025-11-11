@@ -4,16 +4,14 @@ import {
   withComputed,
   withMethods,
   withState,
-  watchState,
-  withHooks,
-  getState,
 } from '@ngrx/signals';
 import { computed, inject } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services';
 import { tap } from 'rxjs/operators';
 import { User } from '../models/user.model';
 import { AuthCredentials } from '../models/auth.model';
 import { Observable } from 'rxjs'; // Import Observable
+import { withLogger } from '../utils';
 
 export interface AuthState {
   currentUser: User | null;
@@ -30,6 +28,7 @@ const initialState: AuthState = {
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
+  withLogger('AuthStore'),
   withMethods((store, authService = inject(AuthService)) => ({
     register(credentials: AuthCredentials): Observable<User> {
       patchState(store, { isLoading: true, error: null });
@@ -73,13 +72,5 @@ export const AuthStore = signalStore(
 
   withComputed((store) => ({
     isLoggedIn: computed(() => !!store.currentUser()),
-  })),
-  withHooks({
-    onInit(store) {
-      watchState(store, (state) => {
-        console.log('AuthStore - State changed:');
-        console.log('current state:', getState(store));
-      });
-    },
-  })
+  }))
 );

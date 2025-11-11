@@ -1,18 +1,63 @@
-<div class="login-container">
-  <h2>Login</h2>
-  <form [formGroup]="loginForm" (ngSubmit)="login()">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" formControlName="email" />
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" formControlName="password" />
-    </div>
-    <button type="submit" [disabled]="loginForm.invalid || store.isLoading()">Login</button>
-  </form>
+﻿<div class="login-shell">
+  <div class="login-shell__panel">
+    <header class="login-header">
+      <span class="material-symbols-outlined login-icon" aria-hidden="true">description</span>
+      <div>
+        <h1>Welcome Back</h1>
+        <p class="login-header__subtitle">Log in to continue to your notes.</p>
+      </div>
+    </header>
 
- 
-  <p>{{ $errorMessage() }}</p>
-  
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="login()">
+      @if ($errorMessage()) {
+        <div class="error-pill" role="status">
+          {{ $errorMessage() }}
+        </div>
+      }
+
+      <div class="field">
+        <shared-ui-input
+          label="Email"
+          prefixIcon="mail"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          formControlName="email"
+          [status]="emailStatus"
+          [helperText]="emailHelperText"
+        ></shared-ui-input>
+      </div>
+
+      <div class="field">
+        <shared-ui-input
+          label="Password"
+          prefixIcon="lock"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          formControlName="password"
+          [status]="passwordStatus"
+          [helperText]="passwordHelperText"
+        ></shared-ui-input>
+        <div class="field__helper">
+          <a class="helper-link" href="#">Forgot password?</a>
+        </div>
+      </div>
+
+      <button
+        class="primary-button"
+        type="submit"
+        [disabled]="loginForm.invalid || store.isLoading()"
+      >
+        Log In
+      </button>
+    </form>
+
+    <p class="signup-cta">
+      Don't have an account?
+      <a href="#">Sign up</a>
+    </p>
+  </div>
 </div>

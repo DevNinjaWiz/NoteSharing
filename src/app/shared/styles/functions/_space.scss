@@ -1,0 +1,11 @@
+$spacing-unit: 0.05rem !default;
+
+/// Converts an abstract scale number into a consistent rem value.
+/// This keeps spacing decisions centralized and remixable.
+@function space($scale, $unit: $spacing-unit) {
+  @if type-of($scale) == 'number' {
+    @return $scale * $unit;
+  }
+
+  @return $scale;
+}

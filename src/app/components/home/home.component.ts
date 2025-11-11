@@ -5,10 +5,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { AuthStore } from '../../store/auth.store';
+import { AuthStore, NotesStore, Note } from '../../store';
 import { Router, RouterModule } from '@angular/router'; // Import Router
-import { NotesStore } from 'src/app/store/notes/note.store';
-import { Note } from '../../store/notes/note.model';
 
 @Component({
   selector: 'app-home',

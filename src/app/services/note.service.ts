@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Note } from '../store/notes/note.model';
+import { Note } from '../store';
 
 @Injectable({ providedIn: 'root' })
 export class NoteService {
