@@ -71,7 +71,8 @@
               "buildTarget": "note-sharing-app:build:production"
             },
             "development": {
-              "buildTarget": "note-sharing-app:build:development"
+              "buildTarget": "note-sharing-app:build:development",
+              "hmr": true
             }
           },
           "defaultConfiguration": "development"
