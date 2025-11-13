@@ -1,8 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
 :root {
-  background-color: #030712;
-  color: #e2e8f0;
+  color-scheme: dark;
+  --app-background: #030712;
+  --app-text: #e2e8f0;
+}
+
+:root.theme-light {
+  color-scheme: light;
+  --app-background: #f8fafc;
+  --app-text: #0f172a;
 }
 
 *, *::before, *::after {
@@ -16,6 +23,8 @@ body {
 }
 
 body {
-  background-color: #030712;
+  background-color: var(--app-background);
+  color: var(--app-text);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }

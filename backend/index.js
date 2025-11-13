@@ -14,11 +14,18 @@ const dbPath = path.join(__dirname, 'db.json');
 
 // Ensure db.json exists and has a users array
 if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, JSON.stringify({ notes: [], users: [] }));
+  fs.writeFileSync(
+    dbPath,
+    JSON.stringify({ notes: [], users: [], friends: [] })
+  );
 } else {
   const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
   if (!db.users) {
     db.users = [];
+    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+  }
+  if (!db.friends) {
+    db.friends = [];
     fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
   }
 }
@@ -80,6 +87,16 @@ app.get('/api/notes', (req, res) => {
       return res.status(500).send('Error reading data file.');
     }
     res.json(JSON.parse(data).notes);
+  });
+});
+
+app.get('/api/friends', (req, res) => {
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).send('Error reading data file.');
+    }
+    const db = JSON.parse(data);
+    res.json(db.friends ?? []);
   });
 });
 

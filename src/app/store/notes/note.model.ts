@@ -5,4 +5,5 @@ export interface Note {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
+  photoUrl?: string;
 }

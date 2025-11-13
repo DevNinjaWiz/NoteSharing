@@ -32,40 +32,113 @@
           </li>
         </ul>
       </nav>
-
-      <div class="dashboard__notebooks" aria-label="Notebooks">
-        <header>
-          <h3>Notebooks</h3>
-          <button type="button" aria-label="Add notebook">
+      <section class="dashboard__section" aria-label="Notebooks">
+        <header class="dashboard__sectionHeader">
+          <div class="dashboard__sectionMeta">
+            <h3>Notebooks</h3>
+            <button type="button" aria-label="Add notebook">
+              <span class="material-symbols-outlined" aria-hidden="true">
+                add
+              </span>
+            </button>
+          </div>
+          <button
+            type="button"
+            class="dashboard__sectionToggle"
+            (click)="toggleNotebooks()"
+            [attr.aria-expanded]="notebooksExpanded()"
+          >
             <span class="material-symbols-outlined" aria-hidden="true">
-              add
+              {{ notebooksExpanded() ? 'expand_less' : 'expand_more' }}
             </span>
           </button>
         </header>
-        <ul>
-          <li *ngFor="let notebook of notebooks">
-            <button type="button">
-              <span
-                class="material-symbols-outlined"
-                aria-hidden="true"
-              >
-                {{ notebook.icon }}
+        <div
+          class="dashboard__sectionList"
+          [class.is-collapsed]="!notebooksExpanded()"
+        >
+          <ul>
+            <li *ngFor="let notebook of notebooks">
+              <button type="button">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  {{ notebook.icon }}
+                </span>
+                <span>{{ notebook.name }}</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="dashboard__section" aria-label="Friends">
+        <header class="dashboard__sectionHeader">
+          <div class="dashboard__sectionMeta">
+            <h3>Friends</h3>
+            <button type="button" aria-label="Add friend">
+              <span class="material-symbols-outlined" aria-hidden="true">
+                person_add
               </span>
-              <span>{{ notebook.name }}</span>
             </button>
-          </li>
-        </ul>
-      </div>
+          </div>
+          <button
+            type="button"
+            class="dashboard__sectionToggle"
+            (click)="toggleFriends()"
+            [attr.aria-expanded]="friendsExpanded()"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">
+              {{ friendsExpanded() ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+        </header>
+        <div
+          class="dashboard__sectionList"
+          [class.is-collapsed]="!friendsExpanded()"
+        >
+          <ng-container *ngIf="friends().length; else friendsFallback">
+            <ul>
+              <li
+                *ngFor="
+                  let friend of friends();
+                  trackBy: trackFriend
+                "
+              >
+                <button type="button">
+                  <ng-container
+                    *ngIf="friend.avatarUrl; else friendIcon"
+                  >
+                    <img
+                      class="dashboard__sectionAvatar"
+                      [src]="friend.avatarUrl"
+                      [alt]="friend.name + ' avatar'"
+                      loading="lazy"
+                    />
+                  </ng-container>
+                  <ng-template #friendIcon>
+                    <span class="material-symbols-outlined" aria-hidden="true">
+                      person
+                    </span>
+                  </ng-template>
+                  <span>{{ friend.name }}</span>
+                </button>
+              </li>
+            </ul>
+          </ng-container>
+          <ng-template #friendsFallback>
+            <p class="dashboard__sectionStatus">
+              {{
+                friendsError()
+                  ? friendsError()
+                  : friendsLoading()
+                    ? 'Loading friends...'
+                    : 'No friends yet.'
+              }}
+            </p>
+          </ng-template>
+        </div>
+      </section>
     </div>
 
-    <button
-      class="dashboard__primaryAction"
-      type="button"
-      (click)="createNewNote()"
-    >
-      <span class="material-symbols-outlined" aria-hidden="true"> add </span>
-      <span>New Note</span>
-    </button>
   </aside>
 
   <main class="dashboard__main">
@@ -74,18 +147,18 @@
         <span class="material-symbols-outlined" aria-hidden="true">
           search
         </span>
-        <input
-          type="search"
-          placeholder="Search notes..."
-          name="note-search"
-        />
+        <input type="search" placeholder="Search notes..." name="note-search" />
       </label>
       <div class="dashboard__topbarActions">
         <button
           class="dashboard__iconButton"
           type="button"
           (click)="toggleTheme()"
-          [attr.aria-label]="theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+          [attr.aria-label]="
+            theme() === 'dark'
+              ? 'Switch to light theme'
+              : 'Switch to dark theme'
+          "
         >
           <span class="material-symbols-outlined" aria-hidden="true">
             {{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}
@@ -98,6 +171,16 @@
         >
           <span class="material-symbols-outlined" aria-hidden="true">
             notifications
+          </span>
+        </button>
+        <button
+          class="dashboard__iconButton dashboard__iconButton--danger"
+          type="button"
+          aria-label="Log out"
+          (click)="logout()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            logout
           </span>
         </button>
         <span class="dashboard__avatar" aria-hidden="true">
@@ -127,12 +210,24 @@
             </span>
           </button>
           <div class="dashboard__viewToggle">
-            <button type="button" class="is-active" aria-label="Grid view">
+            <button
+              type="button"
+              [class.is-active]="viewMode() === 'grid'"
+              aria-label="Grid view"
+              [attr.aria-pressed]="viewMode() === 'grid'"
+              (click)="setViewMode('grid')"
+            >
               <span class="material-symbols-outlined" aria-hidden="true">
                 grid_view
               </span>
             </button>
-            <button type="button" aria-label="List view">
+            <button
+              type="button"
+              [class.is-active]="viewMode() === 'list'"
+              aria-label="List view"
+              [attr.aria-pressed]="viewMode() === 'list'"
+              (click)="setViewMode('list')"
+            >
               <span class="material-symbols-outlined" aria-hidden="true">
                 list
               </span>
@@ -155,15 +250,20 @@
         {{ error() }}
       </p>
 
-      <div class="dashboard__grid" *ngIf="notes().length; else emptyNotes">
+      <div
+        class="dashboard__grid"
+        [class.is-list]="viewMode() === 'list'"
+        *ngIf="notes().length; else emptyNotes"
+      >
         <article
           class="note-card"
+          [class.note-card--list]="viewMode() === 'list'"
           *ngFor="let note of notes(); trackBy: trackNote; let i = index"
         >
           <div
             class="note-card__preview"
             role="img"
-            [style.background-image]="backgroundForNote(i)"
+            [style.background-image]="backgroundForNote(note, i)"
             aria-label="Note cover art"
           ></div>
           <div class="note-card__body">
@@ -171,9 +271,7 @@
             <p class="note-card__excerpt">
               {{ notePreview(note) }}
             </p>
-            <p class="note-card__meta">
-              Edited {{ formatUpdatedAt(note) }}
-            </p>
+            <p class="note-card__meta">Edited {{ formatUpdatedAt(note) }}</p>
           </div>
         </article>
       </div>
@@ -185,12 +283,9 @@
           </span>
           <h2>Start your first note</h2>
           <p>
-            Capture meeting recaps, ideas, and todos. Your notes will
-            appear here once saved.
+            Capture meeting recaps, ideas, and todos. Your notes will appear
+            here once saved.
           </p>
-          <button type="button" (click)="createNewNote()">
-            Create a note
-          </button>
         </div>
       </ng-template>
     </section>
