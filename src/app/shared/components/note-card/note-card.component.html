@@ -36,7 +36,19 @@
     }
   </div>
 
-  <div class="note-card__actions">
+    <div class="note-card__actions">
+    @if (!isTrashView) {
+      <button
+        type="button"
+        class="note-card__action note-card__action--edit"
+        (click)="editRequested.emit(note)"
+        title="Edit note"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          edit
+        </span>
+      </button>
+    }
     <button
       type="button"
       class="note-card__action note-card__action--favorite"

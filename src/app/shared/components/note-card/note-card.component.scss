@@ -204,3 +204,11 @@
     transform: scale(1);
   }
 }
+
+.note-card__action--edit {
+  color: var(--muted-text);
+
+  &:hover {
+    color: var(--primary-gradient-end);
+  }
+}

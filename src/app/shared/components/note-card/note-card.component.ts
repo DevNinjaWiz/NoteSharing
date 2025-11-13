@@ -36,6 +36,7 @@ export class NoteCardComponent {
 
   @Output() favoriteToggle = new EventEmitter<void>();
   @Output() deleteRequested = new EventEmitter<void>();
+  @Output() editRequested = new EventEmitter<Note>();
   @Output() restoreRequested = new EventEmitter<void>();
   @Output() deleteForeverRequested = new EventEmitter<void>();
 

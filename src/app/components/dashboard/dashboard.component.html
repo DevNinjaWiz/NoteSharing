@@ -74,6 +74,51 @@
           </div>
         </div>
       </div>
+      <section
+        class="dashboard__editor"
+        *ngIf="editingNote()"
+        aria-label="Edit note form"
+      >
+        <div class="dashboard__editorHeading">
+          <p class="dashboard__eyebrow">Edit note</p>
+          <h2>{{ editingNote()?.title || 'Untitled note' }}</h2>
+        </div>
+        <label class="dashboard__editorField">
+          <span>Title</span>
+          <input
+            type="text"
+            [value]="editingTitle()"
+            (input)="editingTitle.set($any($event.target).value)"
+            placeholder="Enter note title"
+          />
+        </label>
+        <label class="dashboard__editorField">
+          <span>Content</span>
+          <textarea
+            rows="3"
+            [value]="editingContent()"
+            (input)="editingContent.set($any($event.target).value)"
+            placeholder="Update your note content"
+          ></textarea>
+        </label>
+        <div class="dashboard__editorActions">
+          <button
+            type="button"
+            class="dashboard__editorButton"
+            (click)="applyEdit()"
+            [disabled]="!canSaveEdit()"
+          >
+            Save changes
+          </button>
+          <button
+            type="button"
+            class="dashboard__editorButton dashboard__editorButton--ghost"
+            (click)="cancelEditing()"
+          >
+            Cancel
+          </button>
+        </div>
+      </section>
 
       @if (isLoading()) {
         <p class="dashboard__status">
@@ -110,12 +155,13 @@
               [metaText]="'Edited ' + formatUpdatedAt(note)"
               [trashLocation]="isTrashView() ? notebookPath(note) : ''"
               [trashDeletedAt]="isTrashView() ? formatDeletedAt(note) : ''"
-              (favoriteToggle)="toggleFavorite(note)"
-              (deleteRequested)="deleteNote(note)"
-              (restoreRequested)="restoreNote(note)"
-              (deleteForeverRequested)="deleteNoteForever(note)"
-            />
-          }
+          (favoriteToggle)="toggleFavorite(note)"
+          (deleteRequested)="deleteNote(note)"
+          (restoreRequested)="restoreNote(note)"
+          (deleteForeverRequested)="deleteNoteForever(note)"
+          (editRequested)="startEditing(note)"
+        />
+      }
         </div>
       } @else {
         <div class="dashboard__empty">

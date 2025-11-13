@@ -140,6 +140,19 @@ export class DashboardComponent implements OnInit {
       'All Notes'
   );
   readonly currentCount = computed(() => this.filteredNotes().length);
+  readonly editingNote = signal<Note | null>(null);
+  readonly editingTitle = signal('');
+  readonly editingContent = signal('');
+  readonly canSaveEdit = computed(() => {
+    const note = this.editingNote();
+    if (!note) {
+      return false;
+    }
+    return (
+      this.editingTitle().trim().length > 0 ||
+      this.editingContent().trim().length > 0
+    );
+  });
 
   ngOnInit(): void {
     this.notesStore.loadNotes();
@@ -279,5 +292,31 @@ export class DashboardComponent implements OnInit {
     const notebookName = notebook?.name ?? 'Unfiled';
     const noteTitle = note.title?.trim() || 'Untitled note';
     return `${notebookName} > ${noteTitle}`;
+  }
+
+  startEditing(note: Note): void {
+    this.editingNote.set(note);
+    this.editingTitle.set(note.title ?? '');
+    this.editingContent.set(note.content ?? '');
+  }
+
+  cancelEditing(): void {
+    this.editingNote.set(null);
+    this.editingTitle.set('');
+    this.editingContent.set('');
+  }
+
+  applyEdit(): void {
+    const note = this.editingNote();
+    if (!note) {
+      return;
+    }
+
+    this.notesStore.updateNote(note.id, {
+      title: this.editingTitle().trim(),
+      content: this.editingContent().trim(),
+    });
+
+    this.cancelEditing();
   }
 }
