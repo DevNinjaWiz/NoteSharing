@@ -16,6 +16,7 @@
 - Language: TypeScript (frontend) and JavaScript (backend). Use 2-space indentation in TS/HTML/SCSS and single quotes for strings.  
 - Angular components must be standalone, expose all mutable state via Angular signals (e.g., `input()`, `model()`, `computed()`), and avoid classic `@Input` setters or `EventEmitter` outputs unless interacting with third-party APIs. Derived state should use `computed` rather than getters.  
 - Signals should be read in templates via function-call syntax (`value()`), while derived CSS states belong in SCSS via CSS variables. Prefer readonly arrays/records for immutable lists.  
+- Templates must use the latest Angular control-flow syntax (`@if`, `@else`, `@for`, `@switch`) instead of legacy `*ngIf`, `*ngFor`, etc., unless a third-party library forces otherwise.  
 - Styling uses handcrafted SCSS (no Tailwind/Bootstrap); colocate component styles, keep selectors BEM-inspired (`.dashboard__sidebar`), and route theme toggles through CSS custom properties.  
 - Linting uses ESLint (configured in `eslint.config.mjs`). Run `npm run lint` only after adding the script to `package.json`.
 
