@@ -11,6 +11,8 @@
   justify-content: space-between;
   padding: 1.5rem;
   gap: 1.5rem;
+  min-height: 100%;
+  align-self: stretch;
 }
 
 .dashboard__sidebarInner {
