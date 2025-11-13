@@ -41,13 +41,13 @@
       type="button"
       class="note-card__action note-card__action--favorite"
       (click)="favoriteToggle.emit()"
-      [class.is-active]="note?.isFavorite"
-      [attr.aria-pressed]="note?.isFavorite ?? false"
+      [class.is-active]="note.isFavorite"
+      [attr.aria-pressed]="note.isFavorite ?? false"
       [attr.aria-label]="
-        note?.isFavorite ? 'Remove favorite' : 'Add to favorites'
+        note.isFavorite ? 'Remove favorite' : 'Add to favorites'
       "
       [attr.title]="
-        note?.isFavorite ? 'Remove from favorites' : 'Add to favorites'
+        note.isFavorite ? 'Remove from favorites' : 'Add to favorites'
       "
     >
       <svg

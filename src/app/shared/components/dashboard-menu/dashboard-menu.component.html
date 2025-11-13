@@ -60,7 +60,10 @@
           </span>
         </button>
       </header>
-      <div class="dashboard__sectionList" [class.is-collapsed]="!notebooksExpanded">
+      <div
+        class="dashboard__sectionList"
+        [class.is-collapsed]="!notebooksExpanded"
+      >
         @if (notebooksLoading) {
         <p class="dashboard__sectionStatus">
           <span class="material-symbols-outlined" aria-hidden="true">
@@ -89,9 +92,9 @@
             <button
               type="button"
               [attr.title]="notebook.name"
-              (click)="notebookSelected.emit(notebook.id ?? null)"
-              [class.is-active]="selectedNotebookId === (notebook.id ?? null)"
-              [attr.aria-pressed]="selectedNotebookId === (notebook.id ?? null)"
+              (click)="notebookSelected.emit(notebook.id)"
+              [class.is-active]="selectedNotebookId === notebook.id"
+              [attr.aria-pressed]="selectedNotebookId === notebook.id"
             >
               <span class="material-symbols-outlined" aria-hidden="true">
                 {{ notebook.icon ?? 'book' }}
@@ -135,7 +138,10 @@
           </span>
         </button>
       </header>
-      <div class="dashboard__sectionList" [class.is-collapsed]="!friendsExpanded">
+      <div
+        class="dashboard__sectionList"
+        [class.is-collapsed]="!friendsExpanded"
+      >
         @if (friends.length) {
         <ul>
           @for (friend of friends; track friend.id) {

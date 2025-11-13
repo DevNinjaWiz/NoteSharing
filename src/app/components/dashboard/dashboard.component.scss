@@ -127,7 +127,6 @@
   background: var(--dashboard-bg);
   color: var(--dashboard-text);
 
-
   &__main {
     flex: 1;
     display: flex;
@@ -227,8 +226,10 @@
   }
 
   &__grid {
+    --card-width: 500px;
+
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
     gap: 1.5rem;
 
     &.is-list {
@@ -240,7 +241,7 @@
     &--compact:not(.is-list) {
       grid-template-columns: repeat(
         auto-fill,
-        minmax(min(280px, 100%), 360px)
+        minmax(min(var(--card-width), 100%), 1fr)
       );
       justify-content: flex-start;
       justify-items: stretch;
