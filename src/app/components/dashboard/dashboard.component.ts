@@ -54,6 +54,7 @@ export class DashboardComponent implements OnInit {
   readonly friendsExpanded = signal(false);
   readonly viewMode = signal<ViewMode>('grid');
   readonly sortMode = signal<SortMode>('date');
+  readonly searchQuery = signal('');
   readonly sortOptions: readonly UiSelectOption<SortMode>[] = [
     { label: 'Date', value: 'date' },
     { label: 'Creator', value: 'creator' },
@@ -68,7 +69,7 @@ export class DashboardComponent implements OnInit {
   readonly notebooksError = this.notebookStore.error;
 
   readonly notes = this.notesStore.notes;
-  readonly selectedNotebookId = this.notesStore.selectedNotebookId;
+  readonly selectedNotebookId = this.notesStore.selectedNotebookIdSignal;
   readonly activeNotes = this.notesStore.activeNotes;
   readonly trashedNotes = this.notesStore.trashedNotes;
   readonly isLoading = this.notesStore.isLoading;
@@ -86,21 +87,52 @@ export class DashboardComponent implements OnInit {
       notes = notes.filter((note) => !!note.isFavorite);
     }
 
+    const query = this.searchQuery().trim().toLowerCase();
+    if (query) {
+      notes = notes.filter((note) => {
+        const title = (note.title ?? '').toLowerCase();
+        const content = (note.content ?? '').toLowerCase();
+        return title.includes(query) || content.includes(query);
+      });
+    }
+
+    const notesWithIndex = notes.map((note, index) => ({ note, index }));
+
     if (mode === 'favorite') {
-      return notes.sort((a, b) => Number(b.isFavorite) - Number(a.isFavorite));
+      return notesWithIndex
+        .sort((a, b) => {
+          const diff = Number(b.note.isFavorite) - Number(a.note.isFavorite);
+          if (diff !== 0) {
+            return diff;
+          }
+          return a.index - b.index;
+        })
+        .map(({ note }) => note);
     }
 
     if (mode === 'creator') {
-      return notes.sort((a, b) =>
-        (a.userId ?? '').localeCompare(b.userId ?? '')
-      );
+      return notesWithIndex
+        .sort((a, b) => {
+          const userDiff = (a.note.userId ?? '').localeCompare(b.note.userId ?? '');
+          if (userDiff !== 0) {
+            return userDiff;
+          }
+          return a.index - b.index;
+        })
+        .map(({ note }) => note);
     }
 
-    return notes.sort((a, b) => {
-      const aDate = new Date(a.updatedAt ?? a.createdAt ?? 0).getTime();
-      const bDate = new Date(b.updatedAt ?? b.createdAt ?? 0).getTime();
-      return bDate - aDate;
-    });
+    return notesWithIndex
+      .sort((a, b) => {
+        const aDate = new Date(a.note.updatedAt ?? a.note.createdAt ?? 0).getTime();
+        const bDate = new Date(b.note.updatedAt ?? b.note.createdAt ?? 0).getTime();
+        const diff = bDate - aDate;
+        if (diff !== 0) {
+          return diff;
+        }
+        return a.index - b.index;
+      })
+      .map(({ note }) => note);
   });
   readonly currentViewTitle = computed(
     () =>
@@ -207,6 +239,10 @@ export class DashboardComponent implements OnInit {
 
   isNotebookSelected(notebookId: string | null): boolean {
     return (this.selectedNotebookId() ?? null) === (notebookId ?? null);
+  }
+
+  setSearchQuery(value: string): void {
+    this.searchQuery.set(value);
   }
 
   toggleFavorite(note: Note): void {

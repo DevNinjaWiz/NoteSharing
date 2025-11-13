@@ -3,7 +3,13 @@
     <span class="material-symbols-outlined" aria-hidden="true">
       search
     </span>
-    <input type="search" placeholder="Search notes..." name="note-search" />
+    <input
+      type="search"
+      placeholder="Search notes..."
+      name="note-search"
+      [value]="searchQuery"
+      (input)="onSearchInput($event)"
+    />
   </label>
   <div class="dashboard__topbarActions">
     <button

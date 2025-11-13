@@ -79,7 +79,7 @@ export const NotesStore = signalStore(
     ),
     isLoading: computed(() => store.notesResource.isLoading()),
     error: computed(() => store.notesResource.error()?.message ?? null),
-    selectedNotebookId: computed(() => store.selectedNotebookId()),
+    selectedNotebookIdSignal: computed(() => store.selectedNotebookId()),
   })),
   withEffects((store, events = inject(Events)) => {
     return {
@@ -163,9 +163,15 @@ export const NotesStore = signalStore(
             .toggleFavorite(payload.id, payload.isFavorite)
             .pipe(
               tap((updatedNote) => {
+                const previousNote = store.notesResource
+                  .value()
+                  .find((item) => item.id === payload.id);
+                const noteToStore = previousNote
+                  ? { ...updatedNote, updatedAt: previousNote.updatedAt }
+                  : updatedNote;
                 store.notesResource.update((notes) =>
                   notes.map((existing) =>
-                    existing.id === payload.id ? updatedNote : existing
+                    existing.id === payload.id ? noteToStore : existing
                   )
                 );
               }),

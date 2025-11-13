@@ -20,8 +20,10 @@
   <main class="dashboard__main">
     <app-dashboard-header
       [theme]="theme()"
+      [searchQuery]="searchQuery()"
       (themeToggle)="toggleTheme()"
       (logoutRequested)="logout()"
+      (search)="setSearchQuery($event)"
     ></app-dashboard-header>
 
     <section class="dashboard__content">

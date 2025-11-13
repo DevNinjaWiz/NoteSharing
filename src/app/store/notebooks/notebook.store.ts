@@ -33,7 +33,7 @@ const notebookEvents = eventGroup({
   events: {
     load: type<void>(),
   },
-});
+}); 
 
 export const NotebookStore = signalStore(
   { providedIn: 'root' },

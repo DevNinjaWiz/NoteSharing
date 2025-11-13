@@ -13,9 +13,16 @@ const DEFAULT_AVATAR_URL =
 export class DashboardHeaderComponent {
   @Input() theme: ThemeMode = 'dark';
   @Input() avatarUrl: string = DEFAULT_AVATAR_URL;
+  @Input() searchQuery = '';
 
   @Output() themeToggle = new EventEmitter<void>();
   @Output() logoutRequested = new EventEmitter<void>();
+  @Output() search = new EventEmitter<string>();
+
+  onSearchInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.search.emit(value);
+  }
 
   get themeToggleLabel(): string {
     return this.theme === 'dark'
