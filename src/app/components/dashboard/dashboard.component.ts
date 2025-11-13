@@ -1,124 +1,118 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  Friend,
+  DashboardHeaderComponent,
+  DashboardMenuComponent,
+  NoteCardComponent,
+  UiSelectComponent,
+  UiSelectOption,
+} from '../../shared/components';
+import {
   FriendStore,
   Note,
+  NotebookStore,
   NotesStore,
   ThemeStore,
 } from '../../store';
-
-type IconName =
-  | 'description'
-  | 'star'
-  | 'history'
-  | 'delete'
-  | 'book'
-  | 'logout'
-  | 'expand_more'
-  | 'expand_less'
-  | 'person'
-  | 'person_add';
-
-interface NavItem {
-  readonly label: string;
-  readonly icon: IconName;
-  readonly isPrimary?: boolean;
-}
-
-type ViewMode = 'grid' | 'list';
-
-interface SidebarEntity {
-  readonly name: string;
-  readonly icon: IconName;
-}
+import {
+  NavItem,
+  NavKey,
+  SortMode,
+  ViewMode,
+} from './dashboard.models';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    UiSelectComponent,
+    DashboardMenuComponent,
+    DashboardHeaderComponent,
+    NoteCardComponent,
+  ],
   standalone: true,
 })
 export class DashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly notesStore = inject(NotesStore);
   private readonly friendStore = inject(FriendStore);
+  private readonly notebookStore = inject(NotebookStore);
   private readonly themeStore = inject(ThemeStore);
   readonly theme = this.themeStore.theme;
 
   readonly sideNavLinks: readonly NavItem[] = [
-    { label: 'All Notes', icon: 'description', isPrimary: true },
-    { label: 'Favorites', icon: 'star' },
-    { label: 'Recents', icon: 'history' },
-    { label: 'Trash', icon: 'delete' },
-  ];
-
-  readonly notebooks: readonly SidebarEntity[] = [
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
-    { name: 'Project Phoenix', icon: 'book' },
-    { name: 'Marketing Q3', icon: 'book' },
-    { name: 'Personal', icon: 'book' },
+    { key: 'all', label: 'All Notes', icon: 'description', isPrimary: true },
+    { key: 'favorites', label: 'Favorites', icon: 'star' },
+    { key: 'recents', label: 'Recents', icon: 'history' },
+    { key: 'trash', label: 'Trash', icon: 'delete' },
   ];
 
   readonly notebooksExpanded = signal(false);
   readonly friendsExpanded = signal(false);
   readonly viewMode = signal<ViewMode>('grid');
+  readonly sortMode = signal<SortMode>('date');
+  readonly sortOptions: readonly UiSelectOption<SortMode>[] = [
+    { label: 'Date', value: 'date' },
+    { label: 'Creator', value: 'creator' },
+    { label: 'Favorite', value: 'favorite' },
+  ];
+  readonly selectedNav = signal<NavKey>('all');
   readonly friends = this.friendStore.friends;
   readonly friendsLoading = this.friendStore.isLoading;
   readonly friendsError = this.friendStore.error;
+  readonly notebooks = this.notebookStore.notebooks;
+  readonly notebooksLoading = this.notebookStore.isLoading;
+  readonly notebooksError = this.notebookStore.error;
 
   readonly notes = this.notesStore.notes;
+  readonly selectedNotebookId = this.notesStore.selectedNotebookId;
+  readonly activeNotes = this.notesStore.activeNotes;
+  readonly trashedNotes = this.notesStore.trashedNotes;
   readonly isLoading = this.notesStore.isLoading;
   readonly error = this.notesStore.error;
-  readonly totalNotes = computed(() => this.notes().length);
+  readonly isTrashView = computed(() => this.selectedNav() === 'trash');
+  readonly isFavoritesView = computed(() => this.selectedNav() === 'favorites');
+  readonly totalNotes = computed(() => this.activeNotes().length);
+  readonly filteredNotes = computed(() => {
+    const nav = this.selectedNav();
+    const mode = this.sortMode();
+    const source = nav === 'trash' ? this.trashedNotes() : this.activeNotes();
+    let notes = [...source];
+
+    if (nav === 'favorites') {
+      notes = notes.filter((note) => !!note.isFavorite);
+    }
+
+    if (mode === 'favorite') {
+      return notes.sort((a, b) => Number(b.isFavorite) - Number(a.isFavorite));
+    }
+
+    if (mode === 'creator') {
+      return notes.sort((a, b) =>
+        (a.userId ?? '').localeCompare(b.userId ?? '')
+      );
+    }
+
+    return notes.sort((a, b) => {
+      const aDate = new Date(a.updatedAt ?? a.createdAt ?? 0).getTime();
+      const bDate = new Date(b.updatedAt ?? b.createdAt ?? 0).getTime();
+      return bDate - aDate;
+    });
+  });
+  readonly currentViewTitle = computed(
+    () =>
+      this.sideNavLinks.find((link) => link.key === this.selectedNav())?.label ??
+      'All Notes'
+  );
+  readonly currentCount = computed(() => this.filteredNotes().length);
 
   ngOnInit(): void {
     this.notesStore.loadNotes();
     this.friendStore.loadFriends();
-  }
-
-  trackNote(_: number, note: Note): string {
-    return note.id;
-  }
-
-  notePreview(note: Note): string {
-    const content = note?.content ?? '';
-    const normalized = content.replace(/\s+/g, ' ').trim();
-
-    if (!normalized) {
-      return 'No content yet.';
-    }
-
-    return normalized.length > 130
-      ? `${normalized.slice(0, 127)}...`
-      : normalized;
-  }
-
-  backgroundForNote(note: Note, index: number): string {
-    const image = note.photoUrl;
-    return `url('${image}')`;
+    this.notebookStore.loadNotebooks();
   }
 
   formatUpdatedAt(note: Note): string {
@@ -161,6 +155,24 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  formatDeletedAt(note: Note): string {
+    const rawDate = note.deletedAt ?? note.updatedAt ?? note.createdAt;
+
+    if (!rawDate) {
+      return 'just now';
+    }
+
+    const parsed = rawDate instanceof Date ? rawDate : new Date(rawDate);
+
+    return parsed.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
   logout(): void {
     this.router.navigate(['/login']);
   }
@@ -181,7 +193,43 @@ export class DashboardComponent implements OnInit {
     this.viewMode.set(mode);
   }
 
-  trackFriend(_: number, friend: Friend): string {
-    return friend.id;
+  setSortMode(mode: SortMode): void {
+    this.sortMode.set(mode);
+  }
+
+  selectNav(key: NavKey): void {
+    this.selectedNav.set(key);
+  }
+
+  selectNotebook(notebookId: string | null): void {
+    this.notesStore.filterByNotebook(notebookId);
+  }
+
+  isNotebookSelected(notebookId: string | null): boolean {
+    return (this.selectedNotebookId() ?? null) === (notebookId ?? null);
+  }
+
+  toggleFavorite(note: Note): void {
+    this.notesStore.toggleFavorite(note.id, !note.isFavorite);
+  }
+
+  deleteNote(note: Note): void {
+    this.notesStore.deleteNote(note.id);
+  }
+
+  restoreNote(note: Note): void {
+    this.notesStore.restoreNote(note.id);
+  }
+
+  deleteNoteForever(note: Note): void {
+    this.notesStore.deleteNoteForever(note.id);
+  }
+
+  notebookPath(note: Note): string {
+    const notebook =
+      this.notebooks().find((item) => item.id === note.notebookId) ?? null;
+    const notebookName = notebook?.name ?? 'Unfiled';
+    const noteTitle = note.title?.trim() || 'Untitled note';
+    return `${notebookName} > ${noteTitle}`;
   }
 }

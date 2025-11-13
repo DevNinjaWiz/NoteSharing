@@ -5,8 +5,12 @@
       <h1>Manage your notes</h1>
     </div>
     <div class="home__actions">
-      <button type="button" (click)="refreshNotes()">Reload Notes</button>
-      <button type="button" (click)="logout()">Logout</button>
+      <button type="button" (click)="refreshNotes()" title="Reload your notes">
+        Reload Notes
+      </button>
+      <button type="button" (click)="logout()" title="Log out of the app">
+        Logout
+      </button>
       <a routerLink="/dashboard">Go to Dashboard</a>
     </div>
   </header>
@@ -31,10 +35,19 @@
         ></textarea>
       </label>
       <div class="home__formActions">
-        <button type="submit" [disabled]="noteForm.invalid">
+        <button
+          type="submit"
+          [disabled]="noteForm.invalid"
+          title="{{ editingNoteId ? 'Save changes to this note' : 'Create note' }}"
+        >
           {{ editingNoteId ? 'Save Changes' : 'Add Note' }}
         </button>
-        <button type="button" *ngIf="editingNoteId" (click)="cancelEdit()">
+        <button
+          type="button"
+          *ngIf="editingNoteId"
+          (click)="cancelEdit()"
+          title="Cancel editing"
+        >
           Cancel
         </button>
       </div>
@@ -54,19 +67,33 @@
 
   <section
     class="home__notes"
-    *ngIf="!notesStore.isLoading() && notesStore.notes().length; else emptyNotes"
+    *ngIf="!notesStore.isLoading() && notesStore.activeNotes().length; else emptyNotes"
   >
     <div class="home__notesHeader">
       <h2>Your Notes</h2>
-      <button type="button" (click)="refreshNotes()">Refresh</button>
+      <button type="button" (click)="refreshNotes()" title="Refresh notes list">
+        Refresh
+      </button>
     </div>
     <ul>
-      <li *ngFor="let note of notesStore.notes(); trackBy: trackByNoteId">
+      <li *ngFor="let note of notesStore.activeNotes(); trackBy: trackByNoteId">
         <div class="home__noteHeader">
           <h3>{{ note.title || 'Untitled note' }}</h3>
           <div class="home__noteActions">
-            <button type="button" (click)="startEdit(note)">Edit</button>
-            <button type="button" (click)="deleteNote(note.id)">Delete</button>
+            <button
+              type="button"
+              (click)="startEdit(note)"
+              title="Edit this note"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              (click)="deleteNote(note.id)"
+              title="Delete this note"
+            >
+              Delete
+            </button>
           </div>
         </div>
         <p>{{ note.content || 'No content available.' }}</p>

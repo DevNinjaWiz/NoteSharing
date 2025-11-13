@@ -12,22 +12,87 @@ app.use(express.json());
 
 const dbPath = path.join(__dirname, 'db.json');
 
-// Ensure db.json exists and has a users array
+const readDb = (res, cb) => {
+  fs.readFile(dbPath, 'utf8', (err, data) => {
+    if (err) {
+      res.status(500).send('Error reading data file.');
+      return;
+    }
+    cb(JSON.parse(data));
+  });
+};
+
+const writeDb = (res, db, status = 200, payload) => {
+  fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
+    if (err) {
+      res.status(500).send('Error writing data file.');
+      return;
+    }
+    if (payload === undefined) {
+      res.sendStatus(status);
+    } else {
+      res.status(status).json(payload);
+    }
+  });
+};
+
+const validateNotebookId = (res, db, notebookId) => {
+  const normalizedId =
+    typeof notebookId === 'string' ? notebookId.trim() : '';
+
+  if (!normalizedId) {
+    res.status(400).send('A notebookId is required for notes.');
+    return null;
+  }
+
+  const hasNotebook = (db.notebooks ?? []).some(
+    (notebook) => notebook.id === normalizedId
+  );
+
+  if (!hasNotebook) {
+    res
+      .status(400)
+      .send('Notebook not found. Please select a valid notebook.');
+    return null;
+  }
+
+  return normalizedId;
+};
+
+// Ensure db.json exists and has required collections
 if (!fs.existsSync(dbPath)) {
   fs.writeFileSync(
     dbPath,
-    JSON.stringify({ notes: [], users: [], friends: [] })
+    JSON.stringify({ notes: [], users: [], friends: [], notebooks: [] })
   );
 } else {
   const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
   if (!db.users) {
     db.users = [];
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
   }
   if (!db.friends) {
     db.friends = [];
-    fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
   }
+  if (!db.notebooks) {
+    db.notebooks = [];
+  }
+  if (!db.notes) {
+    db.notes = [];
+  }
+
+  if ((db.notes?.length ?? 0) > 0 && (db.notebooks?.length ?? 0) > 0) {
+    const fallbackNotebookId = db.notebooks[0]?.id ?? null;
+    db.notes = db.notes.map((note) => {
+      if (note?.notebookId) {
+        return note;
+      }
+      return {
+        ...note,
+        notebookId: fallbackNotebookId,
+      };
+    });
+  }
+  fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
 }
 
 // Authentication routes
@@ -82,11 +147,16 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.get('/api/notes', (req, res) => {
-  fs.readFile(dbPath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send('Error reading data file.');
+  const rawNotebookId = typeof req.query?.notebookId === 'string'
+    ? req.query.notebookId.trim()
+    : '';
+
+  readDb(res, (db) => {
+    let notes = db.notes ?? [];
+    if (rawNotebookId && rawNotebookId !== 'all') {
+      notes = notes.filter((note) => note.notebookId === rawNotebookId);
     }
-    res.json(JSON.parse(data).notes);
+    res.json(notes);
   });
 });
 
@@ -100,70 +170,165 @@ app.get('/api/friends', (req, res) => {
   });
 });
 
-app.post('/api/notes', (req, res) => {
+app.get('/api/notebooks', (req, res) => {
   fs.readFile(dbPath, 'utf8', (err, data) => {
     if (err) {
       return res.status(500).send('Error reading data file.');
     }
     const db = JSON.parse(data);
+    res.json(db.notebooks ?? []);
+  });
+});
+
+app.post('/api/notes', (req, res) => {
+  readDb(res, (db) => {
+    const {
+      notebookId: rawNotebookId,
+      title = '',
+      content = '',
+      ...rest
+    } = req.body ?? {};
+    const notebookId = validateNotebookId(res, db, rawNotebookId);
+    if (!notebookId) {
+      return;
+    }
+
+    const now = new Date();
     const newNote = {
       id: Date.now().toString(), // Simple unique ID
-      ...req.body,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      title,
+      content,
+      ...rest,
+      notebookId,
+      isFavorite: !!req.body?.isFavorite,
+      isDeleted: false,
+      deletedAt: null,
+      createdAt: now,
+      updatedAt: now,
     };
+    db.notes ??= [];
     db.notes.push(newNote);
-    fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
-      if (err) {
-        return res.status(500).send('Error writing data file.');
-      }
-      res.status(201).json(newNote);
-    });
+    writeDb(res, db, 201, newNote);
   });
 });
 
 app.put('/api/notes/:id', (req, res) => {
-  fs.readFile(dbPath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send('Error reading data file.');
-    }
-    const db = JSON.parse(data);
+  readDb(res, (db) => {
     const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
     if (noteIndex === -1) {
-      return res.status(404).send('Note not found.');
+      res.status(404).send('Note not found.');
+      return;
+    }
+    const existing = db.notes[noteIndex];
+    const { notebookId: incomingNotebookId, ...rest } = req.body ?? {};
+    const notebookId = validateNotebookId(
+      res,
+      db,
+      incomingNotebookId ?? existing.notebookId
+    );
+    if (!notebookId) {
+      return;
     }
     const updatedNote = {
-      ...db.notes[noteIndex],
-      ...req.body,
+      ...existing,
+      ...rest,
+      notebookId,
+      isFavorite:
+        typeof req.body?.isFavorite === 'boolean'
+          ? req.body.isFavorite
+          : existing.isFavorite ?? false,
+      isDeleted:
+        typeof req.body?.isDeleted === 'boolean'
+          ? req.body.isDeleted
+          : existing.isDeleted ?? false,
+      deletedAt:
+        req.body?.isDeleted === false ? null : existing.deletedAt ?? null,
       updatedAt: new Date(),
     };
     db.notes[noteIndex] = updatedNote;
-    fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
-      if (err) {
-        return res.status(500).send('Error writing data file.');
-      }
-      res.status(200).json(updatedNote);
-    });
+    writeDb(res, db, 200, updatedNote);
+  });
+});
+
+app.patch('/api/notes/:id/favorite', (req, res) => {
+  readDb(res, (db) => {
+    const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
+    if (noteIndex === -1) {
+      res.status(404).send('Note not found.');
+      return;
+    }
+
+    const { isFavorite } = req.body ?? {};
+    if (typeof isFavorite !== 'boolean') {
+      res.status(400).send('isFavorite flag is required.');
+      return;
+    }
+
+    const updatedNote = {
+      ...db.notes[noteIndex],
+      isFavorite,
+      updatedAt: new Date(),
+    };
+    db.notes[noteIndex] = updatedNote;
+
+    writeDb(res, db, 200, updatedNote);
   });
 });
 
 app.delete('/api/notes/:id', (req, res) => {
-  fs.readFile(dbPath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send('Error reading data file.');
+  readDb(res, (db) => {
+    const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
+    if (noteIndex === -1) {
+      res.status(404).send('Note not found.');
+      return;
     }
-    const db = JSON.parse(data);
-    const newNotes = db.notes.filter((note) => note.id !== req.params.id);
-    if (db.notes.length === newNotes.length) {
-      return res.status(404).send('Note not found.');
+
+    const updatedNote = {
+      ...db.notes[noteIndex],
+      isDeleted: true,
+      deletedAt: new Date(),
+      updatedAt: new Date(),
+    };
+    db.notes[noteIndex] = updatedNote;
+    writeDb(res, db, 200, updatedNote);
+  });
+});
+
+app.patch('/api/notes/:id/restore', (req, res) => {
+  readDb(res, (db) => {
+    const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
+    if (noteIndex === -1) {
+      res.status(404).send('Note not found.');
+      return;
     }
-    db.notes = newNotes;
-    fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
-      if (err) {
-        return res.status(500).send('Error writing data file.');
-      }
-      res.status(204).send();
-    });
+
+    const note = db.notes[noteIndex];
+    if (!note.isDeleted) {
+      res.status(400).send('Note is not in trash.');
+      return;
+    }
+
+    const updatedNote = {
+      ...note,
+      isDeleted: false,
+      deletedAt: null,
+      updatedAt: new Date(),
+    };
+    db.notes[noteIndex] = updatedNote;
+    writeDb(res, db, 200, updatedNote);
+  });
+});
+
+app.delete('/api/notes/:id/permanent', (req, res) => {
+  readDb(res, (db) => {
+    const noteIndex = db.notes.findIndex((note) => note.id === req.params.id);
+    if (noteIndex === -1) {
+      res.status(404).send('Note not found.');
+      return;
+    }
+
+    db.notes.splice(noteIndex, 1);
+    writeDb(res, db, 204);
   });
 });
 

@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Friend } from '../store';
+import { Notebook } from '../store';
 
 @Injectable({ providedIn: 'root' })
-export class FriendService {
-  readonly apiUrl = 'http://localhost:3000/api/friends';
+export class NotebookService {
+  readonly apiUrl = 'http://localhost:3000/api/notebooks';
 
   constructor(private readonly http: HttpClient) {}
 
-  getFriends(): Observable<Friend[]> {
-    return this.http.get<Friend[]>(this.apiUrl);
+  getNotebooks(): Observable<Notebook[]> {
+    return this.http.get<Notebook[]>(this.apiUrl);
   }
 }

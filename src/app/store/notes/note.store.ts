@@ -22,10 +22,12 @@ import { withLogger, errorLog } from '../../shared/utils';
 
 export interface NotesState {
   isLoadNotes: boolean;
+  selectedNotebookId: string | null;
 }
 
 const initialState: NotesState = {
   isLoadNotes: false,
+  selectedNotebookId: null,
 };
 
 const notesEvents = eventGroup({
@@ -35,6 +37,9 @@ const notesEvents = eventGroup({
     add: type<Partial<Note>>(),
     update: type<{ id: string; changes: Partial<Note> }>(),
     delete: type<{ id: string }>(),
+    restore: type<{ id: string }>(),
+    deleteForever: type<{ id: string }>(),
+    favorite: type<{ id: string; isFavorite: boolean }>(),
   },
 });
 
@@ -44,7 +49,10 @@ export const NotesStore = signalStore(
   withProps((store) => {
     const noteService = inject(NoteService);
     const notesResource = httpResource<Note[]>(
-      () => (store.isLoadNotes() ? noteService.apiUrl : undefined),
+      () =>
+        store.isLoadNotes()
+          ? noteService.notesUrl(store.selectedNotebookId())
+          : undefined,
       { defaultValue: [] }
     );
 
@@ -61,8 +69,17 @@ export const NotesStore = signalStore(
   ]),
   withComputed((store) => ({
     notes: computed(() => store.notesResource.value()),
+    activeNotes: computed(() =>
+      store.notesResource
+        .value()
+        .filter((note) => !(note.isDeleted ?? false))
+    ),
+    trashedNotes: computed(() =>
+      store.notesResource.value().filter((note) => note.isDeleted ?? false)
+    ),
     isLoading: computed(() => store.notesResource.isLoading()),
     error: computed(() => store.notesResource.error()?.message ?? null),
+    selectedNotebookId: computed(() => store.selectedNotebookId()),
   })),
   withEffects((store, events = inject(Events)) => {
     return {
@@ -103,13 +120,57 @@ export const NotesStore = signalStore(
       deleteNote$: events.on(notesEvents.delete).pipe(
         concatMap(({ payload }) =>
           store.noteService.deleteNote(payload.id).pipe(
+            tap((updatedNote) => {
+              store.notesResource.update((notes) =>
+                notes.map((existing) =>
+                  existing.id === payload.id ? updatedNote : existing
+                )
+              );
+            }),
+            errorLog('Unable to delete note')
+          )
+        )
+      ),
+      restoreNote$: events.on(notesEvents.restore).pipe(
+        concatMap(({ payload }) =>
+          store.noteService.restoreNote(payload.id).pipe(
+            tap((updatedNote) => {
+              store.notesResource.update((notes) =>
+                notes.map((existing) =>
+                  existing.id === payload.id ? updatedNote : existing
+                )
+              );
+            }),
+            errorLog('Unable to restore note')
+          )
+        )
+      ),
+      deleteForever$: events.on(notesEvents.deleteForever).pipe(
+        concatMap(({ payload }) =>
+          store.noteService.permanentlyDeleteNote(payload.id).pipe(
             tap(() => {
               store.notesResource.update((notes) =>
                 notes.filter((existing) => existing.id !== payload.id)
               );
             }),
-            errorLog('Unable to delete note')
+            errorLog('Unable to delete note permanently')
           )
+        )
+      ),
+      toggleFavorite$: events.on(notesEvents.favorite).pipe(
+        concatMap(({ payload }) =>
+          store.noteService
+            .toggleFavorite(payload.id, payload.isFavorite)
+            .pipe(
+              tap((updatedNote) => {
+                store.notesResource.update((notes) =>
+                  notes.map((existing) =>
+                    existing.id === payload.id ? updatedNote : existing
+                  )
+                );
+              }),
+              errorLog('Unable to update favorite state')
+            )
         )
       ),
     };
@@ -126,6 +187,29 @@ export const NotesStore = signalStore(
     },
     deleteNote(id: string) {
       dispatcher.dispatch(notesEvents.delete({ id }));
+    },
+    restoreNote(id: string) {
+      dispatcher.dispatch(notesEvents.restore({ id }));
+    },
+    deleteNoteForever(id: string) {
+      dispatcher.dispatch(notesEvents.deleteForever({ id }));
+    },
+    toggleFavorite(id: string, isFavorite: boolean) {
+      dispatcher.dispatch(notesEvents.favorite({ id, isFavorite }));
+    },
+    filterByNotebook(notebookId: string | null) {
+      const normalized = notebookId ?? null;
+      const hasChanged = store.selectedNotebookId() !== normalized;
+      patchState(store, { selectedNotebookId: normalized });
+
+      if (!store.isLoadNotes()) {
+        dispatcher.dispatch(notesEvents.load());
+        return;
+      }
+
+      if (hasChanged) {
+        store.notesResource.reload();
+      }
     },
   }))
 );

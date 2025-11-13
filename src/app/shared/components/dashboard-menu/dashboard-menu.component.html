@@ -1,0 +1,175 @@
+<aside class="dashboard__sidebar" aria-label="Primary navigation">
+  <div class="dashboard__sidebarInner">
+    <div class="dashboard__brand">
+      <span class="material-symbols-outlined fill" aria-hidden="true">
+        edit_square
+      </span>
+      <div>
+        <p class="dashboard__brandTitle">Notes</p>
+        <p class="dashboard__brandSubtitle">Sharing</p>
+      </div>
+    </div>
+
+    <nav class="dashboard__nav" aria-label="Views">
+      <h3>Library</h3>
+      <ul>
+        @for (link of sideNavLinks; track link.label) {
+        <li>
+          <button
+            class="dashboard__navButton"
+            type="button"
+            (click)="navSelected.emit(link.key)"
+            [class.is-active]="selectedNav === link.key"
+            [attr.title]="link.label"
+          >
+            <span
+              class="material-symbols-outlined"
+              [class.fill]="selectedNav === link.key"
+              aria-hidden="true"
+            >
+              {{ link.icon }}
+            </span>
+            <span>{{ link.label }}</span>
+          </button>
+        </li>
+        }
+      </ul>
+    </nav>
+
+    <section class="dashboard__section" aria-label="Notebooks">
+      <header class="dashboard__sectionHeader">
+        <div class="dashboard__sectionMeta">
+          <h3>Notebooks</h3>
+          <button type="button" aria-label="Add notebook" title="Add notebook">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              add
+            </span>
+          </button>
+        </div>
+        <button
+          type="button"
+          class="dashboard__sectionToggle"
+          (click)="notebooksToggle.emit()"
+          [attr.aria-expanded]="notebooksExpanded"
+          [attr.title]="
+            notebooksExpanded ? 'Collapse notebooks' : 'Expand notebooks'
+          "
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            {{ notebooksExpanded ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+      </header>
+      <div class="dashboard__sectionList" [class.is-collapsed]="!notebooksExpanded">
+        @if (notebooksLoading) {
+        <p class="dashboard__sectionStatus">
+          <span class="material-symbols-outlined" aria-hidden="true">
+            refresh
+          </span>
+          Loading notebooks...
+        </p>
+        } @else if (notebooks.length) {
+        <ul>
+          <li>
+            <button
+              type="button"
+              title="View every notebook"
+              (click)="notebookSelected.emit(null)"
+              [class.is-active]="!selectedNotebookId"
+              [attr.aria-pressed]="!selectedNotebookId"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">
+                library_books
+              </span>
+              <span>All Notebooks</span>
+            </button>
+          </li>
+          @for (notebook of notebooks; track notebook.id ?? notebook.name) {
+          <li>
+            <button
+              type="button"
+              [attr.title]="notebook.name"
+              (click)="notebookSelected.emit(notebook.id ?? null)"
+              [class.is-active]="selectedNotebookId === (notebook.id ?? null)"
+              [attr.aria-pressed]="selectedNotebookId === (notebook.id ?? null)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">
+                {{ notebook.icon ?? 'book' }}
+              </span>
+              <span>{{ notebook.name }}</span>
+            </button>
+          </li>
+          }
+        </ul>
+        } @else {
+        <p class="dashboard__sectionStatus">
+          {{
+            notebooksError
+              ? notebooksError
+              : 'No notebooks have been created yet.'
+          }}
+        </p>
+        }
+      </div>
+    </section>
+
+    <section class="dashboard__section" aria-label="Friends">
+      <header class="dashboard__sectionHeader">
+        <div class="dashboard__sectionMeta">
+          <h3>Friends</h3>
+          <button type="button" aria-label="Add friend" title="Add friend">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              person_add
+            </span>
+          </button>
+        </div>
+        <button
+          type="button"
+          class="dashboard__sectionToggle"
+          (click)="friendsToggle.emit()"
+          [attr.aria-expanded]="friendsExpanded"
+          [attr.title]="friendsExpanded ? 'Collapse friends' : 'Expand friends'"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">
+            {{ friendsExpanded ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+      </header>
+      <div class="dashboard__sectionList" [class.is-collapsed]="!friendsExpanded">
+        @if (friends.length) {
+        <ul>
+          @for (friend of friends; track friend.id) {
+          <li>
+            <button type="button" [attr.title]="friend.name">
+              @if (friend.avatarUrl) {
+              <img
+                class="dashboard__sectionAvatar"
+                [src]="friend.avatarUrl"
+                [alt]="friend.name + ' avatar'"
+                loading="lazy"
+              />
+              } @else {
+              <span class="material-symbols-outlined" aria-hidden="true">
+                person
+              </span>
+              }
+              <span>{{ friend.name }}</span>
+            </button>
+          </li>
+          }
+        </ul>
+        } @else {
+        <p class="dashboard__sectionStatus">
+          {{
+            friendsError
+              ? friendsError
+              : friendsLoading
+              ? 'Loading friends...'
+              : 'No friends yet.'
+          }}
+        </p>
+        }
+      </div>
+    </section>
+  </div>
+</aside>

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -26,19 +26,18 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    effect(() => {
+      if (this.store.isLoggedIn()) {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   register() {
     if (this.registerForm.valid) {
       const credentials: AuthCredentials = this.registerForm.value;
-      this.store.register(credentials).subscribe({
-        next: () => {
-          this.router.navigate(['/']); // Navigate on success
-        },
-        error: (err) => {
-          console.error(err); // Handle error
-        },
-      });
+      this.store.register(credentials);
     }
   }
 }

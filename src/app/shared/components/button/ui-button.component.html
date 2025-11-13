@@ -4,6 +4,7 @@
   [attr.type]="htmlType()"
   [attr.aria-label]="ariaLabel() || null"
   [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.title]="tooltip() || null"
   [disabled]="isDisabled()"
 >
   @if (loading()) {

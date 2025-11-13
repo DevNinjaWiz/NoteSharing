@@ -1,16 +1,22 @@
+import { computed, inject } from '@angular/core';
 import {
   patchState,
   signalStore,
+  type,
   withComputed,
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { computed, inject } from '@angular/core';
+import {
+  Dispatcher,
+  Events,
+  eventGroup,
+  withEffects,
+} from '@ngrx/signals/events';
+import { EMPTY, catchError, switchMap, tap } from 'rxjs';
 import { AuthService } from '../../services';
-import { tap } from 'rxjs/operators';
 import { User } from '../../models/user.model';
 import { AuthCredentials } from '../../models/auth.model';
-import { Observable } from 'rxjs'; // Import Observable
 import { withLogger } from '../../shared/utils';
 
 export interface AuthState {
@@ -25,52 +31,88 @@ const initialState: AuthState = {
   error: null,
 };
 
+const authEvents = eventGroup({
+  source: 'AuthStore',
+  events: {
+    register: type<AuthCredentials>(),
+    login: type<AuthCredentials>(),
+    logout: type<void>(),
+  },
+});
+
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withLogger('AuthStore'),
-  withMethods((store, authService = inject(AuthService)) => ({
-    register(credentials: AuthCredentials): Observable<User> {
-      patchState(store, { isLoading: true, error: null });
-      return authService.register(credentials).pipe(
-        tap({
-          next: (user) => {
-            patchState(store, { currentUser: user, isLoading: false });
-          },
-          error: (error) => {
-            patchState(store, { error: error.message, isLoading: false });
-          },
-        })
-      );
-    },
-    login(credentials: AuthCredentials): Observable<User> {
-      patchState(store, { isLoading: true, error: null });
-      return authService.login(credentials).pipe(
-        tap({
-          next: (user) => {
-            patchState(store, { currentUser: user, isLoading: false });
-          },
-          error: (error) => {
-            patchState(store, { error: error.message, isLoading: false });
-          },
-        })
-      );
-    },
-    logout(): Observable<boolean> {
-      return authService.logout().pipe(
-        tap({
-          next: () => {
-            patchState(store, { currentUser: null });
-          },
-          error: (error) => {
-            patchState(store, { error: error.message });
-          },
-        })
-      );
-    },
-  })),
-
   withComputed((store) => ({
     isLoggedIn: computed(() => !!store.currentUser()),
+    currentUser: computed(() => store.currentUser()),
+    error: computed(() => store.error()),
+  })),
+  withEffects(
+    (store, events = inject(Events), authService = inject(AuthService)) => ({
+      register$: events.on(authEvents.register).pipe(
+        tap(() => patchState(store, { isLoading: true, error: null })),
+        switchMap(({ payload }) =>
+          authService.register(payload).pipe(
+            tap((user) =>
+              patchState(store, { currentUser: user, isLoading: false })
+            ),
+            catchError((error) => {
+              patchState(store, {
+                error: error?.message ?? 'Unable to register',
+                isLoading: false,
+              });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+      login$: events.on(authEvents.login).pipe(
+        tap(() => patchState(store, { isLoading: true, error: null })),
+        switchMap(({ payload }) =>
+          authService.login(payload).pipe(
+            tap((user) =>
+              patchState(store, { currentUser: user, isLoading: false })
+            ),
+            catchError((error) => {
+              patchState(store, {
+                error: error?.message ?? 'Unable to login',
+                isLoading: false,
+              });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+      logout$: events.on(authEvents.logout).pipe(
+        tap(() => patchState(store, { isLoading: true, error: null })),
+        switchMap(() =>
+          authService.logout().pipe(
+            tap(() =>
+              patchState(store, { currentUser: null, isLoading: false })
+            ),
+            catchError((error) => {
+              patchState(store, {
+                error: error?.message ?? 'Unable to logout',
+                isLoading: false,
+              });
+              return EMPTY;
+            })
+          )
+        )
+      ),
+    })
+  ),
+  withMethods((store, dispatcher = inject(Dispatcher)) => ({
+    register(credentials: AuthCredentials) {
+      dispatcher.dispatch(authEvents.register(credentials));
+    },
+    login(credentials: AuthCredentials) {
+      dispatcher.dispatch(authEvents.login(credentials));
+    },
+    logout() {
+      dispatcher.dispatch(authEvents.logout());
+    },
   }))
 );

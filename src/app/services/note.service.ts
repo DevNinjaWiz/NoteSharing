@@ -9,8 +9,17 @@ export class NoteService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getNotes(): Observable<Note[]> {
-    return this.http.get<Note[]>(this.apiUrl);
+  notesUrl(notebookId?: string | null): string {
+    if (!notebookId) {
+      return this.apiUrl;
+    }
+    const url = new URL(this.apiUrl);
+    url.searchParams.set('notebookId', notebookId);
+    return url.toString();
+  }
+
+  getNotes(notebookId?: string | null): Observable<Note[]> {
+    return this.http.get<Note[]>(this.notesUrl(notebookId));
   }
 
   addNote(note: Partial<Note>): Observable<Note> {
@@ -21,7 +30,21 @@ export class NoteService {
     return this.http.put<Note>(`${this.apiUrl}/${id}`, note);
   }
 
-  deleteNote(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  toggleFavorite(id: string, isFavorite: boolean): Observable<Note> {
+    return this.http.patch<Note>(`${this.apiUrl}/${id}/favorite`, {
+      isFavorite,
+    });
+  }
+
+  deleteNote(id: string): Observable<Note> {
+    return this.http.delete<Note>(`${this.apiUrl}/${id}`);
+  }
+
+  restoreNote(id: string): Observable<Note> {
+    return this.http.patch<Note>(`${this.apiUrl}/${id}/restore`, {});
+  }
+
+  permanentlyDeleteNote(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/permanent`);
   }
 }

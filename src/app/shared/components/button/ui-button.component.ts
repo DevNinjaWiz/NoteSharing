@@ -36,6 +36,7 @@ export class UiButtonComponent {
   readonly iconPlacement = input<IconPlacement>('prefix');
   readonly htmlType = input<'button' | 'submit' | 'reset'>('button');
   readonly ariaLabel = input<string | undefined>(undefined);
+  readonly tooltip = input<string | undefined>(undefined);
 
   readonly isDisabled = computed(
     () => this.disabled() || this.loading(),

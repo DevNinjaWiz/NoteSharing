@@ -1,0 +1,103 @@
+<article
+  class="note-card"
+  [class.note-card--list]="viewMode === 'list'"
+  [class.note-card--trash]="isTrashView"
+  [attr.data-view-mode]="viewMode"
+>
+  @if (isTrashView) {
+    <span class="note-card__badge" aria-label="Note resides in trash">
+      In Trash
+    </span>
+  }
+
+  <div
+    class="note-card__preview"
+    role="img"
+    aria-label="Note cover art"
+    [style.background-image]="previewBackground"
+  ></div>
+
+  <div class="note-card__body">
+    <h2>{{ noteTitle }}</h2>
+    <p class="note-card__excerpt">{{ noteExcerpt }}</p>
+    @if (isTrashView) {
+      <div class="note-card__meta note-card__meta--trash">
+        <div>
+          <span class="note-card__metaLabel">Original</span>
+          <span class="note-card__metaValue">{{ derivedTrashLocation }}</span>
+        </div>
+        <div>
+          <span class="note-card__metaLabel">Deleted</span>
+          <span class="note-card__metaValue">{{ derivedTrashDeletedAt }}</span>
+        </div>
+      </div>
+    } @else {
+      <p class="note-card__meta">{{ derivedMetaText }}</p>
+    }
+  </div>
+
+  <div class="note-card__actions">
+    <button
+      type="button"
+      class="note-card__action note-card__action--favorite"
+      (click)="favoriteToggle.emit()"
+      [class.is-active]="note?.isFavorite"
+      [attr.aria-pressed]="note?.isFavorite ?? false"
+      [attr.aria-label]="
+        note?.isFavorite ? 'Remove favorite' : 'Add to favorites'
+      "
+      [attr.title]="
+        note?.isFavorite ? 'Remove from favorites' : 'Add to favorites'
+      "
+    >
+      <svg
+        class="favorite-icon"
+        viewBox="0 0 24 24"
+        role="presentation"
+        focusable="false"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+        />
+      </svg>
+    </button>
+
+    @if (isTrashView) {
+      <button
+        type="button"
+        class="note-card__action"
+        (click)="restoreRequested.emit()"
+        title="Restore note"
+        aria-label="Restore note"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          settings_backup_restore
+        </span>
+      </button>
+      <button
+        type="button"
+        class="note-card__action note-card__action--danger"
+        (click)="deleteForeverRequested.emit()"
+        title="Delete note permanently"
+        aria-label="Delete note permanently"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          delete_forever
+        </span>
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="note-card__action"
+        (click)="deleteRequested.emit()"
+        aria-label="Move note to trash"
+        title="Move note to trash"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">
+          delete
+        </span>
+      </button>
+    }
+  </div>
+</article>

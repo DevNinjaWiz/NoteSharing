@@ -9,6 +9,12 @@
       <label for="password">Password</label>
       <input type="password" id="password" formControlName="password">
     </div>
-    <button type="submit" [disabled]="registerForm.invalid">Register</button>
+    <button
+      type="submit"
+      [disabled]="registerForm.invalid"
+      title="Register a new account"
+    >
+      Register
+    </button>
   </form>
 </div>

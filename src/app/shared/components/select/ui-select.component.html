@@ -1,0 +1,30 @@
+<div class="ui-select" [class.is-open]="isOpen()" [class.is-disabled]="disabled()">
+  <button
+    type="button"
+    class="ui-select__trigger"
+    [attr.aria-expanded]="isOpen()"
+    [disabled]="disabled()"
+    (click)="toggle()"
+    [attr.title]="tooltip() || ('Select ' + label())"
+  >
+    <span>{{ label() }}</span>
+    <span class="ui-select__value">{{ currentLabel() }}</span>
+    <span class="ui-select__chevron" aria-hidden="true">
+      {{ isOpen() ? '▴' : '▾' }}
+    </span>
+  </button>
+  <ul
+    class="ui-select__menu"
+    *ngIf="isOpen()"
+    [style.width.px]="menuWidth()"
+    role="listbox"
+  >
+    <li
+      *ngFor="let option of options()"
+      (click)="select(option)"
+      [class.is-active]="option.value === value()"
+    >
+      {{ option.label }}
+    </li>
+  </ul>
+</div>

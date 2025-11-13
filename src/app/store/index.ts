@@ -4,3 +4,5 @@ export * from './notes/note.store';
 export * from './theme/theme.store';
 export * from './friends/friend.model';
 export * from './friends/friend.store';
+export * from './notebooks/notebook.model';
+export * from './notebooks/notebook.store';
