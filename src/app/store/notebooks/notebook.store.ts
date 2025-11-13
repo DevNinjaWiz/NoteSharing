@@ -15,10 +15,10 @@ import {
   withProps,
   withState,
 } from '@ngrx/signals';
-import { tap } from 'rxjs';
+import { concatMap, tap } from 'rxjs';
 import { Notebook } from './notebook.model';
 import { NotebookService } from '../../services';
-import { withLogger } from '../../shared/utils';
+import { errorLog, withLogger } from '../../shared/utils';
 
 interface NotebookState {
   isLoadNotebooks: boolean;
@@ -32,8 +32,10 @@ const notebookEvents = eventGroup({
   source: 'NotebookStore',
   events: {
     load: type<void>(),
+    create: type<{ name: string }>(),
+    delete: type<{ id: string }>(),
   },
-}); 
+});
 
 export const NotebookStore = signalStore(
   { providedIn: 'root' },
@@ -72,10 +74,54 @@ export const NotebookStore = signalStore(
         }
       })
     ),
+    createNotebook$: events.on(notebookEvents.create).pipe(
+      concatMap(({ payload }) =>
+        store.notebookService.createNotebook(payload.name).pipe(
+          tap((newNotebook) => {
+            store.notebooksResource.update((notebooks) => [
+              ...notebooks,
+              newNotebook,
+            ]);
+          }),
+          errorLog('Unable to create notebook')
+        )
+      )
+    ),
+    deleteNotebook$: events.on(notebookEvents.delete).pipe(
+      concatMap(({ payload }) =>
+        store.notebookService.deleteNotebook(payload.id).pipe(
+          tap(() => {
+            store.notebooksResource.update((notebooks) =>
+              notebooks.filter((notebook) => notebook.id !== payload.id)
+            );
+          }),
+          errorLog('Unable to delete notebook')
+        )
+      )
+    ),
   })),
   withMethods((store, dispatcher = inject(Dispatcher)) => ({
     loadNotebooks() {
       dispatcher.dispatch(notebookEvents.load());
+    },
+    addNotebook(name: string) {
+      const trimmed = name.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      dispatcher.dispatch(
+        notebookEvents.create({
+          name: trimmed,
+        })
+      );
+    },
+    removeNotebook(id: string) {
+      dispatcher.dispatch(
+        notebookEvents.delete({
+          id,
+        })
+      );
     },
   }))
 );

@@ -241,6 +241,18 @@ export class DashboardComponent implements OnInit {
     return (this.selectedNotebookId() ?? null) === (notebookId ?? null);
   }
 
+  addNotebook(name: string): void {
+    this.notebookStore.addNotebook(name);
+  }
+
+  deleteNotebook(notebookId: string): void {
+    if (this.selectedNotebookId() === notebookId) {
+      this.selectNotebook(null);
+    }
+
+    this.notebookStore.removeNotebook(notebookId);
+  }
+
   setSearchQuery(value: string): void {
     this.searchQuery.set(value);
   }

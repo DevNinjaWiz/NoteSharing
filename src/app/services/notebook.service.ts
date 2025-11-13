@@ -12,4 +12,12 @@ export class NotebookService {
   getNotebooks(): Observable<Notebook[]> {
     return this.http.get<Notebook[]>(this.apiUrl);
   }
+
+  createNotebook(name: string): Observable<Notebook> {
+    return this.http.post<Notebook>(this.apiUrl, { name });
+  }
+
+  deleteNotebook(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

@@ -180,6 +180,45 @@ app.get('/api/notebooks', (req, res) => {
   });
 });
 
+app.post('/api/notebooks', (req, res) => {
+  readDb(res, (db) => {
+    const name = (req.body?.name ?? '').toString().trim();
+
+    if (!name) {
+      res.status(400).send('Notebook name is required.');
+      return;
+    }
+
+    const newNotebook = {
+      id: `n${Date.now()}`,
+      name,
+      icon: 'book',
+    };
+
+    db.notebooks = db.notebooks ?? [];
+    db.notebooks.push(newNotebook);
+
+    writeDb(res, db, 201, newNotebook);
+  });
+});
+
+app.delete('/api/notebooks/:id', (req, res) => {
+  readDb(res, (db) => {
+    const notebookIndex = db.notebooks.findIndex(
+      (notebook) => notebook.id === req.params.id
+    );
+
+    if (notebookIndex === -1) {
+      res.status(404).send('Notebook not found.');
+      return;
+    }
+
+    db.notebooks.splice(notebookIndex, 1);
+
+    writeDb(res, db, 204);
+  });
+});
+
 app.post('/api/notes', (req, res) => {
   readDb(res, (db) => {
     const {

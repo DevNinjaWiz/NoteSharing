@@ -15,6 +15,8 @@
     (friendsToggle)="toggleFriends()"
     [friendsLoading]="friendsLoading()"
     [friendsError]="friendsError()"
+    (notebookCreate)="addNotebook($event)"
+    (notebookDelete)="deleteNotebook($event)"
   ></app-dashboard-menu>
 
   <main class="dashboard__main">

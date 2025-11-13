@@ -40,9 +40,17 @@
       <header class="dashboard__sectionHeader">
         <div class="dashboard__sectionMeta">
           <h3>Notebooks</h3>
-          <button type="button" aria-label="Add notebook" title="Add notebook">
+          <button
+            type="button"
+            aria-label="Add notebook"
+            [attr.title]="
+              isCreatingNotebook() ? 'Cancel notebook creation' : 'Add notebook'
+            "
+            (click)="toggleNotebookForm()"
+            [attr.aria-pressed]="isCreatingNotebook()"
+          >
             <span class="material-symbols-outlined" aria-hidden="true">
-              add
+              {{ isCreatingNotebook() ? 'close' : 'add' }}
             </span>
           </button>
         </div>
@@ -61,6 +69,36 @@
         </button>
       </header>
       <div
+        class="dashboard__sectionCreator"
+        *ngIf="isCreatingNotebook()"
+      >
+        <input
+          type="text"
+          placeholder="Notebook name"
+          class="dashboard__sectionCreatorInput"
+          [value]="notebookDraft()"
+          (input)="setNotebookDraft($any($event.target).value)"
+          (keyup.enter)="submitNotebook()"
+        />
+        <div class="dashboard__sectionCreatorActions">
+          <button
+            type="button"
+            class="dashboard__sectionCreatorButton"
+            (click)="submitNotebook()"
+            [disabled]="!notebookDraft().trim()"
+          >
+            Create
+          </button>
+          <button
+            type="button"
+            class="dashboard__sectionCreatorButton dashboard__sectionCreatorButton--ghost"
+            (click)="cancelNotebook()"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+      <div
         class="dashboard__sectionList"
         [class.is-collapsed]="!notebooksExpanded"
       >
@@ -73,7 +111,7 @@
         </p>
         } @else if (notebooks.length) {
         <ul>
-          <li>
+          <li class="dashboard__sectionItem">
             <button
               type="button"
               title="View every notebook"
@@ -88,19 +126,34 @@
             </button>
           </li>
           @for (notebook of notebooks; track notebook.id ?? notebook.name) {
-          <li>
-            <button
-              type="button"
-              [attr.title]="notebook.name"
-              (click)="notebookSelected.emit(notebook.id)"
-              [class.is-active]="selectedNotebookId === notebook.id"
-              [attr.aria-pressed]="selectedNotebookId === notebook.id"
-            >
-              <span class="material-symbols-outlined" aria-hidden="true">
-                {{ notebook.icon ?? 'book' }}
-              </span>
-              <span>{{ notebook.name }}</span>
-            </button>
+          <li class="dashboard__sectionItem">
+            <div class="dashboard__sectionItemContent">
+              <button
+                type="button"
+                class="dashboard__sectionItemButton"
+                [attr.title]="notebook.name"
+                (click)="notebookSelected.emit(notebook.id)"
+                [class.is-active]="selectedNotebookId === notebook.id"
+                [attr.aria-pressed]="selectedNotebookId === notebook.id"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">
+                  {{ notebook.icon ?? 'book' }}
+                </span>
+                <span>{{ notebook.name }}</span>
+              </button>
+              <div class="dashboard__sectionItemOverlay">
+                <button
+                  type="button"
+                  class="dashboard__sectionItemDelete"
+                  aria-label="Delete {{ notebook.name }}"
+                  (click)="requestDelete($event, notebook.id, notebook.name)"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">
+                    delete
+                  </span>
+                </button>
+              </div>
+            </div>
           </li>
           }
         </ul>
