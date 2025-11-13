@@ -17,8 +17,8 @@ import {
 } from '@ngrx/signals/events';
 import { Note } from './note.model';
 import { NoteService } from '../../services';
-import { withLogger, errorLog } from '../../utils';
 import { concatMap, tap } from 'rxjs';
+import { withLogger, errorLog } from '../../shared/utils';
 
 export interface NotesState {
   isLoadNotes: boolean;

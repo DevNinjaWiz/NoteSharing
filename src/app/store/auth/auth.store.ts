@@ -6,12 +6,12 @@ import {
   withState,
 } from '@ngrx/signals';
 import { computed, inject } from '@angular/core';
-import { AuthService } from '../services';
+import { AuthService } from '../../services';
 import { tap } from 'rxjs/operators';
-import { User } from '../models/user.model';
-import { AuthCredentials } from '../models/auth.model';
+import { User } from '../../models/user.model';
+import { AuthCredentials } from '../../models/auth.model';
 import { Observable } from 'rxjs'; // Import Observable
-import { withLogger } from '../utils';
+import { withLogger } from '../../shared/utils';
 
 export interface AuthState {
   currentUser: User | null;
