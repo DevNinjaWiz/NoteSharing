@@ -1,7 +1,5 @@
-@use '../../styles/index' as *;
-
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
-
+// @use '../../styles/index' as *;
+@use 'index' as *;
 :host {
   display: inline-flex;
 }
@@ -15,11 +13,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: space(15);
+  gap: 0.9375rem;
   width: auto;
-  min-height: space(70);
-  padding: space(20) space(30);
-  border-radius: space(25);
+  min-height: 4.375rem;
+  padding: 1.25rem 1.875rem;
+  border-radius: 1.5625rem;
   border: 1px solid transparent;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-weight: 600;
@@ -74,8 +72,8 @@
 }
 
 .shared-ui-button__spinner {
-  width: space(30);
-  height: space(30);
+  width: 1.875rem;
+  height: 1.875rem;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
@@ -165,14 +163,14 @@
 }
 
 .shared-ui-button__control--size-large {
-  min-height: space(80);
-  padding: space(25) space(35);
+  min-height: 5rem;
+  padding: 1.5625rem 2.1875rem;
   font-size: 1.05rem;
 }
 
 .shared-ui-button__control--size-small {
-  min-height: space(55);
-  padding: space(15) space(22);
+  min-height: 3.4375rem;
+  padding: 0.9375rem 1.375rem;
   font-size: 0.9rem;
 }
 
@@ -183,6 +181,6 @@
 .shared-ui-button__control--shape-circle {
   border-radius: 50%;
   padding: 0;
-  width: space(80);
-  height: space(80);
+  width: 5rem;
+  height: 5rem;
 }

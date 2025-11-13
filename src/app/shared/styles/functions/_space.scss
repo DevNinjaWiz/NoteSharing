@@ -9,9 +9,13 @@ $spacing-scale: (
   7: 3rem,
   8: 4rem,
   9: 5rem,
-  10: 6rem
+  10: 6rem,
 );
 
 @function space($key) {
-  @return map-get($spacing-scale, $key);
+  @if map-has-key($spacing-scale, $key) {
+    @return map-get($spacing-scale, $key);
+  }
+
+  @return map-get($spacing-scale, 0);
 }
